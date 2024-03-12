@@ -1,6 +1,6 @@
 ## Text-Analysis-Love-Letters
 
-https://rpubs.com/ebw5tc/stat4559
+[https://rpubs.com/ebw5tc/stat4559](https://rpubs.com/ebw5tc/fitzgeraldloveletters)
 
 One of the most iconic American romances in the 20th century was that of F. Scott Fitzgerald and his wife Zelda Fitzgerald. Claimed to have respectively driven each other to alcoholism and insanity, the two lovers are still known as an example of reckless romance during one of the most decadent periods of American history. Both critically acclaimed writers, Fitzgerald and Zelda shared love letters throughout their whole romance, detailing the dearest sentiments of their feelings and darkest depths of their despairs. They wrote of everything and anything - from the adventures of their daughter Scottie to the Great Depression and to the onset of World War II. Despite all the bad, their letters consistently show their passionate love for the other:
 
