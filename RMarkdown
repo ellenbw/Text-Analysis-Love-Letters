@@ -1,0 +1,1972 @@
+---
+title: "Fitzgerald & Zelda: An Exploration of a 20th Century Romance through Text Analysis"
+author: "Ellen Wray"
+output: 
+  prettydoc::html_pretty:
+    theme: leonids
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+![](Cover.png)
+
+# Introduction
+
+One of the most iconic American romances in the 20th century was that of F. Scott Fitzgerald and his wife Zelda Fitzgerald. Claimed to have respectively driven each other to alcoholism and insanity, the two lovers are still known as an example of reckless romance during one of the most decadent periods of American history. Both critically acclaimed writers, Fitzgerald and Zelda shared love letters throughout their whole romance, detailing the dearest sentiments of their feelings and darkest depths of their despairs. They wrote of everything and anything - from the adventures of their daughter Scottie to the Great Depression and to the onset of World War II. Despite all the bad, their letters consistently show their passionate love for the other: 
+
+> "I've tried so many times to think of a new way to say it – and
+>  its still I love you – love you – love you – my Sweetheart." – *Zelda Fitzgerald*
+
+F Scott Fitzgerald's writing has always struck a chord with me - I find that I resonate with his characters despite the fact these stories were written over a century ago. That's the hallmark of writing that will stand the test of time: creating stories and plots and characters that will always make a reader feel more understood. Many of F Scott's stories were inspired by his own romance with Zelda, as many of his heroines are based around the quintessential "flapper" figure that Zelda represented. As so much as his writing was based around this romance, I was eager to dive deeper into his and his wife's personal history and perhaps see how their personal lives reflected the historical events occurring around them and the societal norms for men and women. 
+
+I created this project with the hopes to visualize their relationship through textual analysis of their love letters. I'll be investigating a multitude of different topics including sentiment analysis, topic modeling, and random forest classification. I want to see how their topics changed over time - especially if they changed in conjunction to events happening in their own lives (alcoholism, mental institutions) and the greater world (the Great Depression, WWII). I'd like to explore the difference in sentiments between F Scott and Zelda, hopefully concluding about the differences between societal roles of men and women in the 20th century. Finally, I'd like to investigate if it is possible to use textual analysis to predict whether a letter was written by F Scott or Zelda, which would suggest that machine learning can learn from the subtleties in language.
+
+# Study Method
+
+**Research Questions:** 
+
+1) Can topic modeling reflect a time series analysis by indicating change over time - more specifically, can we detect different events in the Fitzgeralds' lives by conducting topic modeling over their written correspondence?
+
+To investigate this, I will use four time periods over the course of the Fitzgeralds' courtship and marriage. I will explore how the letters' demographics, sentiments, most used unigrams, and topics changed. 
+
+2) Do men and women write differently in terms of sentiment - does Zelda possess more of a positive/negative sentiment in her correspondence with F Scott, and can this be tied to societal norms of women?
+
+I will split all of the correspondence up between Zelda & F Scott and look for a statistical difference in the means of their sentiment analysis using multiple sentiment lexicons.
+
+3) How unique is a writer's voice - for example, for the love letters exchanged between Zelda & F Scott Fitzgerald, can we predict the letter's writer using a random forest regression with inputs from sentiment analysis and topic modeling?
+
+After conducting sentiment analysis and topic modeling, I will use these as inputs in a random forest classification model and tune the model in an attempt to predict who each letter was written by. 
+
+# Ideal Data Collection
+
+An ideal data collection of the Fitzgeralds' letters would include these characteristics:
+
+- Readily available copies of every letter written by F Scott & Zelda Fitzgerald 
+- Exact dates written from 1918 to 1940
+- Inclusive of all their letters, wires, and other written correspondences
+- Formatted cleanly with an encompassing header
+- Formatted in the same fashion
+- Fact-checked for accuracy
+
+While I was meticulous in my collection, there was room for human error. I would trust the results of this project more if each letter had the same level of transcribed accuracy. Here are some of the data set's errors:
+- Many of the letters had misspellings of commonly used words that have undergone spelling changes over a century. This includes words like "of cource," which are now "of course". It would be ideal if these were all a) fixed to  be "of course" so they could be recognized by a lexicon or b) there was a lexicon created intentionally to recognize spellings in the 20s/30s. 
+- Most of the letters/telegraphs are from Zelda Fitzgerald. It seems probable that she did write more, but it's also known that much of F Scott's correspondence was lost over time. While F Scott saved most of Zelda's letters, she was not able to do the same. This creates an untrue distribution of letters over the two decades.
+- Many of the letters have dates that are simply "May 1921" or "Fall 1930". Furthermore, some of them are "Unknown 1931". It would be better if they all had the exact date so a more thorough chronological order could be created.
+
+Furthermore, the research questions cannot be answered with only one set of letters from one couple. The over-arching questions of investigating how writing reflects historical events and how sentiments differ between men and women in the 1920s would need far more research before conclusions could be generated. This research would need a more complete corpus, featuring letters of many different men and women throughout that time period, to answer those questions. I hope that this analysis can serve as a basis for research hypotheses. 
+
+# Existing Data
+
+The love letters of the Fiztgeralds are over a century old, which makes data collection very difficult. It's like playing a game of telephone - I'm trying to accurately relay what they said over 100 years ago. There are also few chances to get my hands on actual letters exchanged between the Fitzgeralds. Preliminary Google searches showed only snippets of their letters or highly edited versions of their correspondences, which weren't usable for a text analysis project.  
+
+However, I did stumble upon the novel *Dear Scott, Dearest Zelda: The Love Letters of F. Scott Fitzgerald and Zelda Fitzgerald*, edited by Jackson R Bryer and Cathy W Barks. This novel includes an introduction, letters, interludes, photographs, and more. To maintain the integrity of the Fitzgeralds' correspondence, the editors' note explains that they attempted to transcribe the letters as literally as possible, keeping in tact all their spelling errors and grammar misuses. Within the novel, each letter begins with a header, including the sender, the location, the kind of stationary, and date. The letters are transcribed with all their errors and laid out neatly in paragraph format.
+
+I purchased the Kindle version of the book immediately, eager to begin research. However, there was no way to turn this electronic book into a PDF, meaning I had no way to analyze the text. I quickly realized I would need to copy and paste each letter into a word document to create a corpus for this project. I began copying & pasting, patiently saving each letter as a separate word document. After Letter 50, the book stopped letting me copy and paste (for copyright reasons). I switched to copying and pasting on my phone, copying the letter from my Kindle app, e-mailing it to myself, and saving it in a document. After Letter 100, the Kindle app stopped letting me copy and paste (again- for copyright reasons). I typed a few letters up by hand, but realized this would take an absurd amount of time. I began screenshotting the book's pages and uploading them to a photo-to-text website. Each of these copied screen-shots needs copious amounts of checking. After I copy a letter, I check it against the Kindle book to catch any mistakes the photo-to-text website missed. This process - however painstaking - does allow me to save the letters from the book in individual documents.
+
+I have spent days collecting this data. Creating over 300 word documents is a time-consuming process. The first 100 were easy. I could create a letter document at a rate of about 1 letter/2 minute. However, the next 200 were painfully difficult, and my rate increased to about 1 letter/10 minutes. Despite the difficult data collection process, I feel confident that the resulting corpus is as accurate a corpus as possible with the existing data on the Internet. And while the data was not readily available, it made me appreciate the process of collecting data to answer a conduct research. I also realized how data analysis is 80% data cleaning and 20% analysis. This process of data collection is akin to the difficulties of data collection in real research and work.
+
+First, I install packages and libraries needed for this research.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+#Upload all libraries nececssary for the project
+#install.packages("leaflet")
+#install.packages("tidytext")
+#install.packages("tidyverse")
+#install.packages("textreadr")
+#install.packages("readtext")
+#install.packages("zip")
+#install.packages("ggplot2")
+#install.packages("maps")
+#install.packages("dplyr")
+#install.packages("mapproj")
+#install.packages("plotly")
+#install.packages("gridExtra)
+#install.packages("knitr")
+#install.packages("kableExtra")
+#install.packages("gt")
+#install.packages("stringr")
+#install.packages("textdata")
+#install.packages("wordcloud")
+#install.packages("topicmodels")
+#install.packages("textmineR")
+#install.packages("tm")
+#install.packages("reshape2")
+#install.packages("randomForest")
+#install.packages("grid")
+#install.packages("gridExtra")
+library("leaflet")
+library("textreadr")
+library("tidytext")
+library("readtext")
+library("tidyverse")
+library("zip")
+library("ggplot2")
+library("dplyr")
+library("maps")
+library("mapproj")
+library("plotly")
+library("gridExtra")
+library("knitr")
+library("kableExtra")
+library("gt")
+library("stringr")
+library("textdata")
+library("dplyr")
+library("wordcloud")
+library("topicmodels")
+library("plotly")
+library("textmineR")
+library("tm")
+library("reshape2")
+library("randomForest")
+library("grid")
+library("gridExtra")
+library("ROCR")
+```
+
+Next, I set the working directory and upload my corpus of letters from my computer as a zipped file. I unzip the file to allow access to all 300+ letters in R Studio. After creating a loop to read the contents and save each letter, I create a tibble with two columns: doc_id and text. doc_id indicates the file name of each letter (file names is the number of the letter in chronological order of their correspondence). text indicates the contents of each letter, with a header then followed by the letter itself. 
+
+```{r, echo=FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Set the working directory
+setwd("/cloud/project/Letters")
+#Unzip the letters
+#unzip("/cloud/project/Letters/Letters.ZIP")
+
+#Create a list of the file names for the letters
+letters <- list.files("/cloud/project/Letters")
+#Create an empty data frame to store the letter data in
+letters_df <- data.frame()
+#Create a for loop to read each letter and store in the data frame
+for(i in (1:length(letters))) { #iterates through however many letters there are 
+  x <- readtext::readtext(letters[i]) #reads the content of each letter
+  x <- as.data.frame(x) #changes the content to be a data frame type
+  letters_df[i,c(1:2)] <- x} #stores that data in the first and second columns of the letter data frame
+#Create a tibble from the created data frame of letters
+letters_tibble <- tibble(letters_df)
+```
+
+Here are the first few entries of the tibble:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE }
+head(letters_tibble)
+```
+
+# Data Analysis
+
+All 333 letters are taken from the before mentioned novel. This novel has split up the letters into 4 distinct time periods. I've split up the data analysis into these four distinct time periods. I will conduct exploratory data analysis and preliminary text analysis on each time period.
+
+## Part I: Courtship & Marriage (1918-1920)
+
+The story begins with Scott & Zelda's meeting at the Country Club. Zelda, a raging, young socialite, and Scott, a lieutenant in the United States Army, meet at a dance at the Montgomery Country Club.
+
+Zelda continued courting other men, which made Scott even more passionate in his pursuit of her. Throughout their courtship, there were ups and downs - including a break up because of Zelda mailing a fraternity man's pin to Scott by accident. However, their relationship rekindled, and Scott proposed after his first published novel *This Side of Paradise*. Throughout this beginning phase of their romance, there are 48 letters and telegraphs (wires), all of them illustrating the beginning of their passions. 
+
+Let's explore these letters by pulling vital information, including the senders, receivers, location of the sender, and the date received. This preliminary data analysis serves to show the demographics behind their correspondence. 
+
+### Exploratory Data Analysis
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE, results = 'asis'}
+#Create an empty list for the number of the letters in part 1
+part1_letters <- c()
+#Create a for loop to add ".docx" on the end of each number
+for (i in (1:48)){ #iterate over all these letters
+    y <- paste(i, ".docx", sep = "") #create a string of the file name
+    part1_letters[i] <- y} #add the the list of letters in part 1
+#Find the position of those letters within the tibble
+part1_letters_pos <- match(part1_letters, letters_tibble$doc_id)
+#Subset the tibble based off those positions to have part 1 data
+part1_letters <- letters_tibble[c(part1_letters_pos),]
+
+#Create the data frame
+Part1_DF <- data.frame(c(1:48))
+
+#Create the list for receiver of the letter
+receiver <- c()
+#Create a for loop to pull out the receiver of the document
+for (i in (1:length(part1_letters$doc_id))){ #iterate over every letter
+  y <- strsplit(part1_letters$text[i], " ")[[1]][3] #split the string by spaces 
+  receiver[i] <- unlist(y)} #save the third item to the receiver list
+#Add the receivers to the data frame
+Part1_DF$Receiver <- receiver
+#Create the list for sender of the letter
+sender <- c()
+#Create for loop to do an if/else statement to add opposite of receiver
+for (i in (1:length(Part1_DF$Receiver))){ #iterate over every letter
+    if (Part1_DF$Receiver[i] == "ZELDA"){ #if the receiver was Zelda,
+        y <- "SCOTT"} #then the sender was Scott
+    else { #else
+        y <- "ZELDA"} #the sender was Zelda
+    sender[i] <- y} #add to the list
+#Add the sender list to the data frame
+Part1_DF$Sender <- sender
+#Create a regex expression to look for
+type_str <- "(Wire.)"
+#Create a list for the type of correspondence
+type <- c() 
+#Create a for loop to pull out the type of correspondence
+for (i in (1:length(part1_letters$text))){  #iterate over every letter/wire
+  y <- str_count(part1_letters$text[i], type_str) #look to see if regex is there
+  if (y == 0){ #if there are no occurances of the regex,
+    z <- "Letter"} #then the correspondence was a letter
+  else{ #else
+    z <- "Wire"} #the correspondence was a wire
+  type[i] <- z} #add to the list
+#Add the type list to the data frame
+Part1_DF$Type <- type
+#Create a list for the date the letter was sent
+dates <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part1_DF$Type == "Letter")
+#Create a regex expression to pull out the date from letters
+letter_date_str <- "\\[.*[0-9]{4}\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post <- which(Part1_DF$Type == "Wire")
+#Create a regex expression to pull out the date from wires
+wire_date_str <- "[A-Z]{3}\\s+[0-9]{2}.*[0-9]{4}"
+#Create a for loop to pull out the date from each correspondence
+for (i in (1:length(part1_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part1_letters$text[i], letter_date_str) #look for the letter date regex
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #take away the second bracket
+  else{ #else
+    y <- str_extract(part1_letters$text[i], wire_date_str)} #look for the wire date regex
+  dates[i] <- unlist(y)} #add to the date list
+#Add the dates to the data frame
+Part1_DF$Date <- unlist(dates)
+#Create a list for the location the letter was sent from  
+locations <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part1_DF$Type == "Letter")
+#Create a regex for the letter location
+letter_location_str <- "\\[.{0,3}[A-z]*\\,{1}\\s{1}[A-z]*\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post <- which(Part1_DF$Type == "Wire")
+#Create a regex for the wire location
+wire_date_str <- ""
+#Create a for loop to pull out the location from each correspondence
+for (i in (1:length(part1_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part1_letters$text[i], letter_location_str)
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #look for the letter date regex
+  else{ #else
+    y <- NA} #look for the wire date regex
+  locations[i] <- unlist(y)} #add to the date list
+#Add the locations to the data frame
+Part1_DF$Location <- unlist(locations)
+```
+
+Here's the raw data frame achieved from pulling information straight from the letters tibble. I did this by creating regex expressions to look for key words and formatting. After using string matching, I created a data frame to put all the information in. Here's the head of it:
+
+```{r, echo = FALSE}
+#Show the Data Frame
+gt(head(Part1_DF))
+```
+
+It's clear that there needs to be some cleaning done. I will manually fix some of the errors, mostly centered around fixing the dates and location columns. Because not all letters and telegraphs have the same format for the heading (another flaw of the data), the regex string doesn't work perfectly.
+
+```{r, echo= FALSE, results = 'asis'}
+#Clean the data frame; for the dates (have to manually fix)
+Part1_DF$Date[2] <- "February 1919"
+Part1_DF$Date[3] <- "February 1919"
+Part1_DF$Date[8] <- "March 1919"
+Part1_DF$Date[9] <- "March 1919"
+Part1_DF$Date[10] <- "March 1919"
+Part1_DF$Date[15] <- "April 1919"
+Part1_DF$Date[17] <- "April 1919"
+Part1_DF$Date[19] <- "April 1919"
+Part1_DF$Date[20] <- "April 1919"
+Part1_DF$Date[26] <- "May 1919"
+Part1_DF$Date[27] <- "May 1919"
+Part1_DF$Date[34] <- "November 1919"
+Part1_DF$Date[35] <- "November 1919"
+Part1_DF$Date[36] <- "January 1920"
+Part1_DF$Date[37] <- "January 1920"
+Part1_DF$Date[38] <- "January 1920"
+Part1_DF$Date[39] <- "January 1920"
+Part1_DF$Date[40] <- "February 1920"
+Part1_DF$Date[44] <- "March 1920"
+Part1_DF$Date[45] <- "March 1920"
+Part1_DF$Date[46] <- "March 1920"
+Part1_DF$Date[47] <- "March 1920"
+Part1_DF$Date[48] <- "March 1920"
+#Factor the date column so they are recognized as chronological levels
+Part1_DF$Date <- factor(Part1_DF$Date, levels = c("August 1918", "September 1918", "October 1918", "November 1918", "December 1918", "January 1919", "February 1919", "March 1919", "April 1919", "May 1919", "June 1919", "July 1919", "August 1919", "September 1919", "October 1919", "November 1919", "December 1919", "January 1920", "February 1920", "March 1920"))
+
+#Clean the data frame; all of Zelda's location was in Alabama
+for (i in c(1:48)){
+    if((Part1_DF$Sender[i] == "ZELDA" & (Part1_DF$Location[i] != "Montgomery, Alabama" | is.na(Part1_DF$Location[i]))) == T) 
+    {Part1_DF[i, 6] <- "Montgomery, Alabama"}}
+#Clean the data frame; most of Scott's location was in NYC
+for (i in c(1:48)){
+    if((Part1_DF$Sender[i] == "SCOTT" & is.na(Part1_DF$Location[i])) == T) 
+    {Part1_DF[i, 6] <- "New York, New York"}}
+#Had to manually fix some entries: the Wires are hard to collect from
+Part1_DF[1,6] <- "Montgomery, Alabama"
+Part1_DF[2,6] <- "Charlotte, North Carolina"
+Part1_DF[37,6] <- "St. Paul, Minnesota"
+Part1_DF[37,6] <- "New Orleans, Louisiana"
+Part1_DF[38,6] <- "New Orleans, Louisiana"
+Part1_DF[44,6] <- "Princeton, New Jersey"
+Part1_DF[45,6] <- "Princeton, New Jersey"
+Part1_DF[46,6] <- "Princeton, New Jersey"
+Part1_DF[47,6] <- "Princeton, New Jersey"
+
+#Fix the first column name
+names(Part1_DF)[names(Part1_DF) == "c.1.48."] <- "Letter Number"
+
+#Show the data frame
+gt(Part1_DF)
+```
+
+Now, let's make some visual representations:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Create a ggplot for showing who sent each letter
+p1_sender_type <- ggplot(Part1_DF, aes(fill=Type, x=Sender)) + 
+    geom_bar(position="stack", stat="count") + scale_fill_manual(values = c("#EC2437","#555555"))
+#Create a ggplot for showing the time that each letter was sent
+p1_time <- ggplot(Part1_DF, aes(x=Date)) + 
+    geom_histogram(stat="count", aes(fill=Type)) + theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1)) + scale_y_continuous("Count of Letters", breaks=c(1:10)) +labs(title = "Letters over Time") + scale_fill_manual(values = c("#EC2437","#555555")) + scale_x_discrete(limits = levels(Part1_DF$Date))
+#USA data from the world package
+USA <- map_data("world") %>% filter(region=="USA")
+#City data from the world package
+city_data <- world.cities %>% filter(country.etc=="USA")
+#Create a list of the cities that were present in Part 1
+p1_city_data <- unique(Part1_DF$Location)
+#Create a loop for pulling out just the city name and dropping USA
+for (i in c(1:5)){ #iterating over each item in the city data list
+    y <- strsplit(p1_city_data[i], ",")[[1]][1] #split the string by the comma
+    p1_city_data[i] <- y} #add the city name back into the list
+#Look for the cities present in Part 1 within the city data from the world package
+x <- c(which(city_data$name == p1_city_data[1]), which(city_data$name == p1_city_data[2]), which(city_data$name == p1_city_data[3]), which(city_data$name == p1_city_data[4]), which(city_data$name == p1_city_data[5]))
+#Create a new list of cities from the city data from the world package
+p1_cities <- city_data[c(x),]
+#Manually add in Princeton, NJ - this wasn't present in the city data
+p1_cities[5,] <- data.frame(name="Princeton", country.etc="USA", pop=30728, lat=40.35, long=-74.66, capital=0)
+#Use tidy verse to count how many letters for each location 
+z <- Part1_DF %>% #identity the data frame we want to add to
+    group_by(Location) %>% #group by location
+    count(Location) #count the letters written in each location
+#Add the letter counts to the city data frame
+p1_cities$letter.count <- unlist(c(z[2,2], z[1,2], z[4,2], z[3,2], z[5,2]))
+#Use tidyverse to create text that will appear when hovering over the map
+p1_cities <- p1_cities %>% #identify the data to edit from
+  mutate(mytext = paste( #Create a new column
+    "City: ", name, "\n", #Name of the city
+    "Letters: ", letter.count, sep="")) #Count of the letters
+#Plot the USA map that will show bubbles over each city and letter counts
+p1_map <- ggplot() + geom_polygon(data = USA, aes(x=long, y = lat, group=group), fill="grey", alpha=0.3) + geom_point(data=p1_cities, aes(x=long, y=lat, size=factor(letter.count), color="#EC2437", text=mytext, alpha=0.8), shape=20, stroke=FALSE) +  theme_void() + ylim(25,50) + coord_map(xlim=c(-125,-70)) + theme(legend.position = "none") + labs(title = "Part 1: Letters Across the Country")
+#Create ggplotly objects
+a <- ggplotly(p1_sender_type)
+b <- ggplotly(p1_time)
+c <- ggplotly(p1_map, tooltip="text")
+#Show those objects
+a
+b
+#c
+```
+
+A quick overview of the exploratory data analysis:
+
+- There was an even split of correspondence from Zelda & Scott, showing mutual interest in their courting period.
+- Scott used mostly telegraphs that were quite short and Zelda wrote love letters that were very long.
+- Drop in correspondence during their "break up," which was in the Summer/Early Fall of 1919. 
+- Previously created a map to pinpoint where they were but this made the RMarkdown file too large, so I took it out. However, both stayed on the East Coast during this time, with Zelda primarily in Montgomery, AL (her home) and Scott traveling around the East Coast for the release of his novel.
+
+### Text Analysis
+
+Now, I want to dive into text analysis for this first time period. Revisit our text structure, the tibble we created for the first era.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Show the head of the letters object
+head(part1_letters)
+```
+
+This tibble is structured with the doc_id (letter number) on the left and the text (contents of the letter) on the right. Before we can use analysis, we must tidy up the data. While the headers of the letters were crucial for our exploratory data analysis, this is not info needed for text analysis. Because of that, let's scrap the headers. To do this, we can split the text by the enter line and delete the header.
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+#Create a loop to separate and delete the headers from the tibble's text content
+for (i in (1:length(part1_letters$text))){ #iterate over all the letters in Part 1
+  x <- str_split(part1_letters$text[i], "\n", n=2)[[1]][2] #split by the enter line
+  part1_letters$text[i] <- x} #add only the content back to the text
+#Show the head of the fixed letters
+head(part1_letters$text)
+```
+
+Now, we have to unnest the tokens:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+#Use tidyverse and tidytext to unnest the tokens
+tidy_p1 <- part1_letters %>% #indicate Part 1 letters
+    unnest_tokens(word,text) #use the unnest function
+```
+
+We take out the stop words:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+#Use tidyverse and tidytext to take out the stop words (and, the, etc.)
+tidy_p1 <- tidy_p1 %>% #indicate the tidy object for Part 1
+    anti_join(stop_words) #'anti join' takes out the stop words
+```
+
+#### Word Frequency
+
+Let's look at the words featured the most in the letters:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Use tidyverse to generate word counts for Part 1 letters
+x <- tidy_p1 %>% #indicate the tidy object for Part 1
+  count(word, sort = TRUE) #Count the words and then sort from high to low
+#Show the head of this object
+head(x)
+#Use tidyverse to create a ggplot of the top words used in the letters
+x <- tidy_p1 %>% #indicate the tidy object for Part 2
+    count(word, sort = TRUE) %>% #count the words and then sort from high to low
+    filter(n > 15) %>% #Filter only the words that have counts above 15
+    mutate(word = reorder(word, n)) %>% #Reorder the word column to be from high to low
+    ggplot(aes(n, word)) + #Create a ggplot object
+    geom_col(fill="#EC2437", alpha=0.8) + #Change the color and transparency
+    labs(y = NULL) #No labels for the ggplot
+#Make the object an interactive plotly object
+ggplotly(x)
+```
+
+Just as suspected, the top words are phrases like "love", "darling", "zelda", "scott", "sweetheart". This is evident that F Scott and Zelda are in the courtship phase of their relationship, head over heels in love. Many of their letters pine for each other's attention and exclaim their overwhelmingly love for the other. 
+
+#### Sentiment Analysis
+
+The top words had, as expected, a heavy emphasis on love. Because this is the early phase of their romance and they are excited about their prospect of marriage, I predict their sentiments will be very positive. I'll be using two of the lexicons that focus on unigram: afinn and bing. Each lexicon provides a different focus. 
+
+- afinn lexicon gives a number from -5 to 5
+- bing lexicon gives a word a binary negative or positive class
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+#afinn; preview of this lexicon
+head(get_sentiments("afinn"))
+#bing; preview of this lexicon
+head(get_sentiments("bing"))
+```
+
+**AFINN**
+
+I will use tidyverse to manipulate the tidy text object and create an afinn sentiment for each document.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Use tidyverse to give each letter in Part 1 an afinn sentiment
+p1_afinn_sentiment <- tidy_p1 %>%  #Indicate the tidy object for Part 1
+  inner_join(get_sentiments("afinn")) %>% #Join this object with the afinn sentiments
+  group_by(doc_id) %>% #Group all the documents by their unique document ID
+  summarise(sentiment = sum(value)) %>% #Sum all the afinn values for each document
+  mutate(method = "AFINN") #Create a column for these sentiments
+#Create a for loop to fix the document IDs from characters to integers
+for (i in (1:length(p1_afinn_sentiment$doc_id))){ #iterate over all the documents in the afinn object
+  x <- as.integer(strsplit(p1_afinn_sentiment$doc_id[i], "\\.")[[1]][1]) #get rid of the '.docx' part
+  p1_afinn_sentiment$doc_id[i] <- x} #replace the doc ID with the cleaned number
+#Add a row that had an average of 0 sentiment - so the loop just had it as nothing
+p1_afinn_sentiment <- rbind(p1_afinn_sentiment, c(32, 0, "AFINN"))
+#Turn all the doc IDs into an integer 
+p1_afinn_sentiment$doc_id <- as.integer(p1_afinn_sentiment$doc_id)
+#Turn all the afinn sentiments into an integer
+p1_afinn_sentiment$sentiment <- as.integer(p1_afinn_sentiment$sentiment)
+#Reorder the afinn sentiment object by the doc IDs
+p1_afinn_sentiment <- p1_afinn_sentiment[order(p1_afinn_sentiment$doc_id),]
+#Show the head of the afinn object
+gt(head(p1_afinn_sentiment))
+#Create a ggplot of the afinn sentiment
+x <- ggplot(p1_afinn_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+#Make the object an interactive plotly object
+ggplotly(x)
+```
+
+There's a heavy emphasis on positive sentiment for this analysis - just as expected for two people very in love.
+
+**BING**
+
+I will do the same and use tidyverse to manipulate the tidy text object and create an bing sentiment for each document.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+#Use tidyverse to give each letter in Part 1 a bing sentiment
+p1_bing_sentiment <- tidy_p1 %>% #Indicate the tidy object for Part 1
+  inner_join(get_sentiments("bing")) %>% #Join this object with the bing sentiments
+  count(doc_id, sentiment) %>% #Count the sentiments present for each document ID
+  spread(sentiment, n, fill = 0) %>% #spread the sentiments by n
+  mutate(sentiment = positive - negative) #Create a column for the bing sentiments
+#Create a for loop to fix the document IDs from characters to integers
+for (i in (1:length(p1_bing_sentiment$doc_id))){ #iterate over all the documents in the bing object
+  x <- as.integer(strsplit(p1_bing_sentiment$doc_id[i], "\\.")[[1]][1]) #get rid of the '.docx' part
+  p1_bing_sentiment$doc_id[i] <- x} #replace the doc ID with the cleaned number
+#Turn all the doc IDs into an integer 
+p1_bing_sentiment$doc_id <- as.integer(p1_bing_sentiment$doc_id)
+#Reorder the bing sentiment object by the doc IDs
+p1_bing_sentiment <- p1_bing_sentiment[order(p1_bing_sentiment$doc_id),]
+#Show the head of the bing object
+gt(head(p1_bing_sentiment))
+#Create a ggplot of the bing sentiment
+x <- ggplot(p1_bing_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+#Make the object an interactive plotly object
+ggplotly(x)
+#Create word counts for the bing sentiments
+p1_bing_word_counts <- tidy_p1 %>% #Indicate using the tidy object for Part 1
+  inner_join(get_sentiments("bing")) %>% #Join with the bing sentiment
+  count(word, sentiment, sort = TRUE) %>% #Count the sentiment for each word
+  ungroup() #ungroup all of those
+#Create a ggplot of these bing word counts
+p1_bing_word_counts %>% #Indicate the object to be used
+    group_by(sentiment) %>% #Group by 'negative' and 'positive'
+    top_n(10) %>% #Show only the top ten words in each category
+    ungroup() %>% #Ungroup those
+    mutate(word = reorder(word, n)) %>% #Order the word column from high to low
+    ggplot(aes(n, word, fill = factor(sentiment))) + #Create the ggplot
+    geom_col(show.legend = FALSE) + #Don't show the column
+    facet_wrap(~sentiment, scales = "free_y") + #Have the same y column and side by side graphs
+    labs(x = "Contribution to sentiment", #x axis title
+         y = NULL) + #no y axis title
+    scale_fill_manual(values = c("#EC2437","#FBCDD1")) #colors for the graphs
+```
+
+We see a slightly more negative sentiment to the bing sentiment. However, we also see the top words contributing to each sentiment. For the negative sentiment, the top word contributing is "miss", indicating that they miss each other and long to be with one another. While a negative word, this is actually quite a sweet feeling to share with a loved one. Their sadness from missing one another while courting long distance could be a huge factor in the slight negative sentiment throughout this time period.
+
+**WORDCLOUD**
+
+Now, just for fun, let's make a word cloud to see the top words. What sticks out?
+
+```{r}
+#Create a wordcloud using tidyverse
+tidy_p1 %>% #indicate the Part 1 tidy object
+  anti_join(stop_words) %>% #get rid of all the stop words
+  count(word) %>% #generate word counts for all the words
+  with(wordcloud(word, n, max.words = 50)) #create the word cloud
+```
+
+Again, all the things we saw previously stick out - their names, love, sweetheart, home towns, writing, etc. 
+
+## Part II: Years Together (1920-1929)
+
+Despite this time period being a decade long, there are only 3 letters in this range of correspondence. This is mostly because they were together during this time, both in America and in Europe. However, they quarreled constantly when together. This decade is the start of F Scott's alcoholism and Zelda's insanity.
+
+### Exploratory Data Analysis
+
+Because all the analysis is the same code, I will be commenting much less heavily. The only differences in the code are the changes to objects being associated with Part 2.
+
+```{r, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE}
+#Create an empty list for the number of the letters in part 2
+part2_letters <- c()
+#Create a for loop to add ".docx" on the end of each number
+for (i in (49:51)){ #iterate over all these letters
+    y <- paste(i, ".docx", sep = "") #create a string of the file name
+    part2_letters[i] <- y} #add the the list of letters in part 2
+#Delete the empty values (letters from Part 1)
+part2_letters <- part2_letters[-c(1:48)]
+#Find the position of those letters within the tibble
+part2_letters_pos <- match(part2_letters, letters_tibble$doc_id)
+#Subset the tibble based off those positions to have part 2 data
+part2_letters <- letters_tibble[c(part2_letters_pos),]
+
+#Create the data frame
+Part2_DF <- data.frame(c(49:51))
+#Create the list for receiver of the letter
+receiver2 <- c()
+#Create a for loop to pull out the receiver of the document
+for (i in (1:length(part2_letters$doc_id))){ #iterate over every letter
+  y <- strsplit(part2_letters$text[i], " ")[[1]][3] #split the string by spaces 
+  receiver2[i] <- unlist(y)} #save the third item to the receiver list
+#Add the receivers to the data frame
+Part2_DF$Receiver <- receiver2
+#Create the list for sender of the letter
+sender2 <- c()
+#Create for loop to do an if/else statement to add opposite of receiver
+for (i in (1:length(Part2_DF$Receiver))){ #iterate over every letter
+    if (Part2_DF$Receiver[i] == "ZELDA"){ #if the receiver was Zelda,
+        y <- "SCOTT"} #then the sender was Scott
+    else { #else
+        y <- "ZELDA"} #the sender was Zelda
+    sender2[i] <- y} #add to the list
+#Add the sender list to the data frame
+Part2_DF$Sender <- sender2
+#Create a regex expression to look for
+type_str <- "(Wire.)"
+#Create a list for the type of correspondence
+type2 <- c() 
+#Create a for loop to pull out the type of correspondence
+for (i in (1:length(part2_letters$text))){  #iterate over every letter/wire
+  y <- str_count(part2_letters$text[i], type_str) #look to see if regex is there
+  if (y == 0){ #if there are no occurances of the regex,
+    z <- "Letter"} #then the correspondence was a letter
+  else{ #else
+    z <- "Wire"} #the correspondence was a wire
+  type2[i] <- z} #add to the list
+#Add the type list to the data frame
+Part2_DF$Type <- type2
+#Create a list for the date the letter was sent
+dates2 <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos2 <- which(Part2_DF$Type == "Letter")
+#Create a regex expression to pull out the date from letters
+letter_date_str <- "\\[.*[0-9]{4}\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post2 <- which(Part2_DF$Type == "Wire")
+#Create a regex expression to pull out the date from wires
+wire_date_str <- "[A-Z]{3}\\s+[0-9]{2}.*[0-9]{4}"
+#Create a for loop to pull out the date from each correspondence
+for (i in (1:length(part2_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos2) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part2_letters$text[i], letter_date_str) #look for the letter date regex
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #take away the second bracket
+  else{ #else
+    y <- str_extract(part2_letters$text[i], wire_date_str)} #look for the wire date regex
+  dates2[i] <- unlist(y)} #add to the date list
+
+#Add the dates to the data frame
+Part2_DF$Date <- unlist(dates2)
+#Fix the date of the third letter
+Part2_DF$Date[3] <- "September 1930"
+#Factor the dates to have chronological order
+Part2_DF$Date <- factor(Part2_DF$Date, levels = c("September 1920", "Summer 1930", "September 1930"))
+#Manually type the locations to be added to these letters
+locations2 <- c("Westport, Connecticut", "Paris, France", "Nyon, Switzerland")
+#Add the locations to the data frame
+Part2_DF$Location <- unlist(locations2)
+
+#Fix the first column name
+names(Part2_DF)[names(Part2_DF) == "c.49.51."] <- "Letter Number"
+
+#Show the data frame
+gt(Part2_DF)
+```
+
+Here is the completed data frame. The three letters are from all over the world, from Connecticut to Paris to Switzerland. Let's make some visualizations and conclusions from this analysis.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p2_sender_type <- ggplot(Part2_DF, aes(fill=Type, x=Sender)) + 
+    geom_bar(position="stack", stat="count") + scale_fill_manual(values = c("#EC2437","#555555"))
+
+p2_time <- ggplot(Part2_DF, aes(x=Date)) + 
+    geom_histogram(stat="count", aes(fill=Type)) + theme(axis.text.x = element_text(angle = 45, vjust=1, hjust=1)) + scale_y_continuous("Count of Letters", breaks=c(1:10)) +labs(title = "Letters over Time") + scale_fill_manual(values = c("#EC2437","#555555"))
+
+World <- map_data("world") 
+city_data <- world.cities 
+
+p2_city_data <- unique(Part2_DF$Location)
+for (i in c(1:3)){
+    y <- strsplit(p2_city_data[i], ",")[[1]][1]
+    p2_city_data[i] <- y}
+
+x <- c(which(city_data$name == p2_city_data[1]), which(city_data$name == p2_city_data[2]), which(city_data$name == p2_city_data[3]))
+
+p2_cities <- city_data[c(x),]
+p2_cities <- p2_cities[-c(2,3),]
+p2_cities[1,] <- data.frame(name="Westport", country.etc="USA", pop=28115, lat= 41.14, long=-73.36 ,capital=0)
+
+p2_cities$letter.count <- c(1,1,1)
+
+p2_cities <- p2_cities %>%
+  mutate(mytext = paste(
+    "City: ", name, "\n",
+    "Letters: ", letter.count, sep=""))
+
+p2_map <- ggplot() + geom_polygon(data = World, aes(x=long, y = lat, group=group), fill="grey", alpha=0.3) + geom_point(data=p2_cities, aes(x=long, y=lat, size=factor(letter.count), color="#EC2437", text=mytext, alpha=0.8), shape=20, stroke=FALSE) +  theme_void()  + coord_map() + theme(legend.position = "none") + labs(title = "Part 2: Letters Across the World")
+
+a <- ggplotly(p2_sender_type)
+b <- ggplotly(p2_time)
+c <- ggplotly(p2_map, tooltip="text")
+
+a
+b
+#c
+```
+
+A quick overview of the exploratory data analysis:
+
+- Huge gap in their correspondence over this decade. How much of it was from the fact they lived together and how much of it was from lost letters/telegraphs?
+- There is only evidence of letters - no telegraphs.
+- They traveled a lot: all over the U.S. and over Europe.
+
+### Text Analysis
+
+Now, I want to dive into text analysis for this second time period. Revisit our text structure, the tibble we created for the second era.
+
+```{r, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE}
+head(part2_letters)
+```
+
+As we did for the first time period, let's scrap the headers.
+
+```{r, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE}
+for (i in (1:length(part2_letters$text))){
+  x <- str_split(part2_letters$text[i], "\n", n=2)[[1]][2]
+  part2_letters$text[i] <- x}
+
+head(part2_letters$text)
+```
+
+Now, we have to unnest the tokens:
+
+```{r, warning = FALSE, error = FALSE, message = FALSE}
+tidy_p2 <- part2_letters %>%
+    unnest_tokens(word,text)
+```
+
+We take out the stop words:
+
+```{r, warning = FALSE, error = FALSE, message = FALSE}
+tidy_p2 <- tidy_p2 %>%
+    anti_join(stop_words)
+```
+
+#### Word Frequency
+
+Let's look at the words featured the most in the letters:
+
+```{r, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE}
+x <- tidy_p2 %>%
+  count(word, sort = TRUE) 
+
+head(x)
+
+x <- tidy_p2 %>%
+    count(word, sort = TRUE) %>%
+    filter(n > 5) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word)) +
+    geom_col(fill="#EC2437", alpha=0.8) +
+    labs(y = NULL)
+
+ggplotly(x)
+```
+
+This is a very different visualization from the previous era. The top words are "sick", "quarreled", "drunk", "party", etc. These words hint at the fact that F Scott struggled with drinking and Zelda is became mentally ill.
+
+#### Sentiment Analysis
+
+The Fitzgeralds have faced initial heartbreaks in the form of alcoholism and mental breakdowns. Because of this, I expect a lower emphasis on love, romance, and adoration. Instead, I expect a heavier emphasis on negative words. Their sentiments will most likely take on a negative hue, reflecting their early disagreements and reserves in their marriage. 
+
+**AFINN**
+```{r, warning = FALSE, error = FALSE, message = FALSE}
+p2_afinn_sentiment <- tidy_p2 %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(doc_id) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+for (i in (1:length(p2_afinn_sentiment$doc_id))){
+  x <- as.integer(strsplit(p2_afinn_sentiment$doc_id[i], "\\.")[[1]][1])
+  p2_afinn_sentiment$doc_id[i] <- x}
+
+p2_afinn_sentiment$doc_id <- as.integer(p2_afinn_sentiment$doc_id)
+
+p2_afinn_sentiment <- p2_afinn_sentiment[order(p2_afinn_sentiment$doc_id),]
+
+gt(head(p2_afinn_sentiment))
+
+x <- ggplot(p2_afinn_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437") + ylim(c(-90,10))
+
+ggplotly(x)
+```
+
+As suspected, these three letters all have negative sentiments. I think it is interesting how they become more negative with each letter over time. 
+
+**BING**
+```{r, echo = FALSE, warning = FALSE, error = FALSE, message = FALSE}
+p2_bing_sentiment <- tidy_p2 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(doc_id, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+for (i in (1:length(p2_bing_sentiment$doc_id))){
+  x <- as.integer(strsplit(p2_bing_sentiment$doc_id[i], "\\.")[[1]][1])
+  p2_bing_sentiment$doc_id[i] <- x}
+
+p2_bing_sentiment$doc_id <- as.integer(p2_bing_sentiment$doc_id)
+
+p2_bing_sentiment <- p2_bing_sentiment[order(p2_bing_sentiment$doc_id),]
+
+gt(head(p2_bing_sentiment))
+
+x <- ggplot(p2_bing_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437") + ylim(c(-70,10))
+
+ggplotly(x)
+
+p2_bing_word_counts <- tidy_p2 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+p2_bing_word_counts %>%
+    group_by(sentiment) %>%
+    top_n(10) %>%
+    ungroup() %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word, fill = factor(sentiment))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~sentiment, scales = "free_y") +
+    labs(x = "Contribution to sentiment",
+         y = NULL) +
+    scale_fill_manual(values = c("#EC2437","#FBCDD1"))
+```
+
+Not only does the bing sentiment illustrate the same negative sentiment from afinn, but it also confirms that the driving forces of negativity in these letters are the words "drunk" and "sick". These are consequently the largest issues the Fitzgeralds were dealing with during this time period. This is a very different negativity than the "miss" sentiment driving the negativity in the previous section. However, it's also interesting to note that there are still positive words, too, like "love" and "darling". Despite all their problems, it is clear F Scott and Zelda did still love each other.
+
+**WORDCLOUD**
+
+Another word cloud as a different way to visualize the top unigrams.
+
+```{r}
+tidy_p2 %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 50))
+```
+
+## Part III: Breaking Down (1930-1938)
+
+This era was one of many different mental institutions for Zelda. She hopped around from 4-5 different institutions over the course of eight years. The few times she was released did not yield good results. As she was a part from Scott, she became an avid letter writer, constantly updating him about her life, feelings, and writings. Scott was hard at work trying to take care of Zelda, their daughter Scottie, and continue his novel-writing and script-writing. This was a very stressful time for the couple as the United States was also undergoing the shocking Great Depression.
+
+### Exploratory Data Analysis
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE, results = 'asis'}
+#Create an empty list for the number of the letters in part 3
+part3_letters <- c()
+#Create a for loop to add ".docx" on the end of each number
+for (i in (52:209)){ #iterate over all these letters
+    y <- paste(i, ".docx", sep = "") #create a string of the file name
+    part3_letters[i] <- y} #add the the list of letters in part 3
+#Delete the empty values (letters from Part 1 & Part 2)
+part3_letters <- part3_letters[-c(1:51)]
+#Find the position of those letters within the tibble
+part3_letters_pos <- match(part3_letters, letters_tibble$doc_id)
+#Subset the tibble based off those positions to have part 1 data
+part3_letters <- letters_tibble[c(part3_letters_pos),]
+
+#Create the data frame
+Part3_DF <- data.frame(c(52:209))
+#Create the list for receiver of the letter
+receiver <- c()
+#Create a for loop to pull out the receiver of the document
+for (i in (1:length(part3_letters$doc_id))){ #iterate over every letter
+  y <- strsplit(part3_letters$text[i], " ")[[1]][3] #split the string by spaces 
+  receiver[i] <- unlist(y)} #save the third item to the receiver list
+#Add the receivers to the data frame
+Part3_DF$Receiver <- receiver
+#Create the list for sender of the letter
+sender <- c()
+#Create for loop to do an if/else statement to add opposite of receiver
+for (i in (1:length(Part3_DF$Receiver))){ #iterate over every letter
+    if (Part3_DF$Receiver[i] == "ZELDA"){ #if the receiver was Zelda,
+        y <- "SCOTT"} #then the sender was Scott
+    else { #else
+        y <- "ZELDA"} #the sender was Zelda
+    sender[i] <- y} #add to the list
+#Add the sender list to the data frame
+Part3_DF$Sender <- sender
+#Create a regex expression to look for
+type_str <- "(Wire.)"
+#Create a list for the type of correspondence
+type <- c() 
+#Create a for loop to pull out the type of correspondence
+for (i in (1:length(part3_letters$text))){  #iterate over every letter/wire
+  y <- str_count(part3_letters$text[i], type_str) #look to see if regex is there
+  if (y == 0){ #if there are no occurances of the regex,
+    z <- "Letter"} #then the correspondence was a letter
+  else{ #else
+    z <- "Wire"} #the correspondence was a wire
+  type[i] <- z} #add to the list
+#Add the type list to the data frame
+Part3_DF$Type <- type
+#Create a list for the date the letter was sent
+dates <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part3_DF$Type == "Letter")
+#Create a regex expression to pull out the date from letters
+letter_date_str <- "\\[.*[0-9]{4}\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post <- which(Part3_DF$Type == "Wire")
+#Create a regex expression to pull out the date from wires
+wire_date_str <- "[A-Z]{3}\\s+[0-9]{2}.*[0-9]{4}"
+#Create a for loop to pull out the date from each correspondence
+for (i in (1:length(part3_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part3_letters$text[i], letter_date_str) #look for the letter date regex
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #take away the second bracket
+  else{ #else
+    y <- str_extract(part3_letters$text[i], wire_date_str)} #look for the wire date regex
+  dates[i] <- unlist(y)} #add to the date list
+#Add the dates to the data frame
+Part3_DF$Date <- unlist(dates)
+#Create a list for the locations
+locations <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part3_DF$Type == "Letter")
+#Create a regex for the letter location
+letter_location_str <- "\\[[A-z]*\\s{0,1}[A-z]*\\,{1}\\s{1}[A-z]*\\,{0,1}\\s{0,1}[A-z]*\\s{0,1}[A-z]*\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post <- which(Part3_DF$Type == "Wire")
+#Create a regex for the wire location
+wire_date_str <- ""
+#Create a for loop to pull out the location from each correspondence
+for (i in (1:length(part3_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part3_letters$text[i], letter_location_str)
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #look for the letter date regex
+  else{ #else
+    y <- NA} #look for the wire date regex
+  locations[i] <- unlist(y)} #add to the date list
+#Add the locations to the data frame
+Part3_DF$Location <- unlist(locations)
+```
+
+Here's the raw data frame achieved from pulling information straight from the letters tibble.
+
+```{r, echo = FALSE}
+#Show the Data Frame
+gt(head(Part3_DF))
+```
+
+It's clear that there needs to be some cleaning done. I will manually fix some of the errors, mostly centered around fixing the date and location columns.
+
+```{r, echo= FALSE, results = 'asis'}
+#Clean the data frame for the dates (have to manually fix)
+Part3_DF$Date[1] <- "June 1930"
+Part3_DF$Date[2] <- "June 1930"
+Part3_DF$Date[3] <- "June 1930"
+Part3_DF$Date[4] <- "June 1930"
+Part3_DF$Date[5] <- "June 1930"
+Part3_DF$Date[7] <- "June 1930"
+Part3_DF$Date[9] <- "August 1930"
+Part3_DF$Date[10] <- "September 1930"
+Part3_DF$Date[11] <- "September 1930"
+Part3_DF$Date[12] <- "September 1930"
+Part3_DF$Date[13] <- "September 1930"
+Part3_DF$Date[14] <- "October 1930"
+Part3_DF$Date[15] <- "October 1930"
+Part3_DF$Date[16] <- "November 1930"
+Part3_DF$Date[19] <- "February 1931"
+Part3_DF$Date[20] <- "March 1931"
+Part3_DF$Date[21] <- "April 1931"
+Part3_DF$Date[22] <- "May 1931"
+Part3_DF$Date[23] <- "May 1931"
+Part3_DF$Date[24] <- "May 1931"
+Part3_DF$Date[25] <- "June 1931"
+Part3_DF$Date[26] <- "July 1931"
+Part3_DF$Date[27] <- "August 1931"
+Part3_DF$Date[31] <- "November 1931"
+Part3_DF$Date[32] <- "November 1931"
+Part3_DF$Date[33] <- "November 1931"
+Part3_DF$Date[34] <- "November 1931"
+Part3_DF$Date[35] <- "November 1931"
+Part3_DF$Date[36] <- "November 1931"
+Part3_DF$Date[37] <- "November 1931"
+Part3_DF$Date[38] <- "November 1931"
+Part3_DF$Date[39] <- "November 1931"
+Part3_DF$Date[40] <- "November 1931"
+Part3_DF$Date[41] <- "November 1931"
+Part3_DF$Date[42] <- "November 1931"
+Part3_DF$Date[43] <- "November 1931"
+Part3_DF$Date[44] <- "November 1931"
+Part3_DF$Date[45] <- "November 1931"
+Part3_DF$Date[46] <- "November 1931"
+Part3_DF$Date[47] <- "November 1931"
+Part3_DF$Date[48] <- "November 1931"
+Part3_DF$Date[49] <- "November 1931"
+Part3_DF$Date[50] <- "November 1931"
+Part3_DF$Date[51] <- "November 1931"
+Part3_DF$Date[52] <- "November 1931"
+Part3_DF$Date[53] <- "December 1931"
+Part3_DF$Date[66] <- "February 1931"
+Part3_DF$Date[67] <- "February 1931"
+Part3_DF$Date[68] <- "March 1931"
+Part3_DF$Date[69] <- "March 1931"
+Part3_DF$Date[70] <- "March 1931"
+Part3_DF$Date[71] <- "March 1931"
+Part3_DF$Date[72] <- "March 1931"
+Part3_DF$Date[73] <- "March 1931"
+Part3_DF$Date[74] <- "March 1931"
+Part3_DF$Date[77] <- "May 1932"
+Part3_DF$Date[78] <- "May 1933"
+Part3_DF$Date[79] <- "June 1933"
+Part3_DF$Date[80] <- "March 1934"
+Part3_DF$Date[85] <- "April 1934"
+Part3_DF$Date[86] <- "April 1934"
+Part3_DF$Date[87] <- "April 1934"
+Part3_DF$Date[88] <- "April 1934"
+Part3_DF$Date[89] <- "April 1934"
+Part3_DF$Date[90] <- "April 1934"
+Part3_DF$Date[91] <- "April 1934"
+Part3_DF$Date[92] <- "April 1934"
+Part3_DF$Date[93] <- "April 1934"
+Part3_DF$Date[103] <- "June 1934"
+Part3_DF$Date[104] <- "September 1934"
+Part3_DF$Date[106] <- "February 1935"
+Part3_DF$Date[108] <- "July 1935"
+Part3_DF$Date[109] <- "August 1935"
+Part3_DF$Date[111] <- "October 1935"
+Part3_DF$Date[112] <- "April 1936"
+Part3_DF$Date[113] <- "May 1936"
+Part3_DF$Date[114] <- "June 1936"
+Part3_DF$Date[116] <- "July 1936"
+Part3_DF$Date[117] <- "July 1936"
+Part3_DF$Date[126] <- "April 1937"
+Part3_DF$Date[129] <- "June 1937"
+Part3_DF$Date[130] <- "June 1937"
+Part3_DF$Date[134] <- "August 1937"
+Part3_DF$Date[136] <- "September 1937"
+Part3_DF$Date[137] <- "October 1937"
+Part3_DF$Date[147] <- "August 1937"
+#Factor the dates to be in chronological order
+Part3_DF$Date <- factor(Part3_DF$Date, levels = c("June 1930", "July 1930", "August 1930", "September 1930", "October 1930", "November 1930", "December 1930", "January 1931", "February 1931", "March 1931", "April 1931", "May 1931", "June 1931", "July 1931", "August 1931", "September 1931", "October 1931", "November 1931", "December 1931", "January 1932", "February 1932", "March 1932", "April 1932", "May 1932", "June 1932", "July 1932", "August 1932", "September 1932", "October 1932", "November 1932", "December 1932", "January 1933", "February 1933", "March 1933", "April 1933", "May 1933", "June 1933", "July 1933", "August 1933", "September 1933", "October 1933", "November 1933", "December 1933", "January 1934", "February 1934", "March 1934", "April 1934", "May 1934", "June 1934", "July 1934", "August 1934", "September 1934", "October 1934", "November 1934", "December 1934", "January 1935", "February 1935", "March 1935", "April 1935", "May 1935", "June 1935", "July 1935", "August 1935", "September 1935", "October 1935", "November 1935", "December 1935", "January 1936", "February 1936", "March 1936", "April 1936", "May 1936", "June 1936", "July 1936", "August 1936", "September 1936", "October 1936", "November 1936", "December 1936", "January 1937", "February 1937", "March 1937", "April 1937", "May 1937", "June 1937", "July 1937", "August 1937", "September 1937", "October 1937", "November 1937", "December 1937",  "January 1938", "February 1938", "March 1938", "April 1938", "May 1938", "June 1938", "July 1938", "August 1938", "September 1938", "October 1938", "November 1938", "December 1938"))
+
+#Had to manually fix some entries for location
+Part3_DF$Location[7] <- "Bern, Switzerland"
+Part3_DF$Location[8] <- "Prangins Clinic, Nyon, Switzerland"
+Part3_DF$Location[40] <-"Montgomery, Alabama"
+Part3_DF$Location[41] <-"Montgomery, Alabama"
+Part3_DF$Location[48] <-"Montgomery, Alabama"
+Part3_DF$Location[50] <-"Montgomery, Alabama"
+Part3_DF$Location[92] <-"Baltimore, Maryland"
+Part3_DF$Location[96] <-"Baltimore, Maryland"
+Part3_DF$Location[c(96:99)] <-"Sheppard and Enoch Pratt Hospital, Towson, Maryland"
+Part3_DF$Location[100] <-"Baltimore, Maryland"
+Part3_DF$Location[c(101:111)] <-"Sheppard and Enoch Pratt Hospital, Towson, Maryland"
+Part3_DF$Location[118] <-"Asheville, North Carolina"
+Part3_DF$Location[145] <-"New York City, New York"
+Part3_DF$Location[150] <-"New York City, New York"
+
+#Fix the first column name
+names(Part3_DF)[names(Part3_DF) == "c.52.209."] <- "Letter Number"
+
+#Show the data frame
+gt(Part3_DF)
+```
+
+This data frame is much longer because they wrote so many letters during the 1930s. A quick scan of the data frame shows that it was mostly Zelda writing the letters and almost all her locations were at different mental hospitals. It's also clear their writing was much more constant than ever before, with Zelda writing Scott nearly multiple letters every month.
+
+Now, let's make some visual representations:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p3_sender_type <- ggplot(Part3_DF, aes(fill=Type, x=Sender)) + 
+    geom_bar(position="stack", stat="count") + scale_fill_manual(values = c("#EC2437","#555555"))
+
+p3_time <- ggplot(Part3_DF, aes(x=Date)) + 
+    geom_histogram(stat="count", aes(fill=Type)) + theme(axis.text.x = element_text(angle = 90, vjust=1, hjust=1)) + scale_y_continuous("Count of Letters") +labs(title = "Letters over Time") + scale_fill_manual(values = c("#EC2437","#555555")) + scale_x_discrete(limits = levels(Part3_DF$Date))
+
+USA <- map_data("world") %>% filter(region=="USA")
+city_data <- world.cities %>% filter(country.etc=="USA")
+
+p3_city_data <- unique(Part3_DF$Location)
+for (i in c(1:14)){
+    y <- strsplit(p3_city_data[i], ",")[[1]][1]
+    p3_city_data[i] <- y}
+
+p3_city_data[1] <- "Nyon"
+p3_city_data[4] <- "Baltimore"
+p3_city_data[5] <- "Towson"
+p3_city_data[6] <- "Beacon"
+p3_city_data[8] <- "Towson"
+p3_city_data[9] <- "Asheville"
+
+x <- c(which(city_data$name == p3_city_data[1]), which(city_data$name == p3_city_data[2]), which(city_data$name == p3_city_data[3]), which(city_data$name == p3_city_data[4]), which(city_data$name == p3_city_data[5]),which(city_data$name == p3_city_data[6]), which(city_data$name == p3_city_data[7]), which(city_data$name == p3_city_data[8]), which(city_data$name == p3_city_data[9]), which(city_data$name == p3_city_data[10]),which(city_data$name == p3_city_data[11]), which(city_data$name == p3_city_data[12]), which(city_data$name == p3_city_data[13]), which(city_data$name == p3_city_data[14]))
+
+p3_cities <- city_data[c(x),]
+p3_cities[8,] <- data.frame(name="Hollywood", country.etc="USA", pop=61491, lat=34.093, long=-118.328, capital=0)
+p3_cities[10,] <- data.frame(name="Nyon", country.etc="Switzerland", pop=18269, lat=46.383, long=6.240, capital=0)
+p3_cities[11,] <- data.frame(name="Bern", country.etc="Switzerland", pop=133115, lat=46.948, long=7.447, capital=1)
+p3_cities[12,] <- data.frame(name="Beacon", country.etc="USA", pop=14523, lat=41.505, long=-74.000, capital=0)
+p3_cities[13,] <- data.frame(name="New York", country.etc="USA", pop=8399000, lat=40.713, long=-74.006, capital=0)
+p3_cities[14,] <- data.frame(name="Malibu", country.etc="USA", pop=12777, lat=34.026, long=-118.780, capital=0)
+
+p3_cities <- p3_cities[-c(4:6),]
+n <- c(34,16,18,39,1,1,29,1,15,2,2)
+
+z <- Part3_DF %>% 
+    group_by(Location) %>%
+    count(Location)
+    p3_cities$letter.count <- unlist(n)
+p3_cities <- p3_cities %>%
+  mutate(mytext = paste(
+    "City: ", name, "\n",
+    "Letters: ", letter.count, sep=""))
+
+p3_map <- ggplot() + geom_polygon(data = World, aes(x=long, y = lat, group=group), fill="grey", alpha=0.3) + geom_point(data=p3_cities, aes(x=long, y=lat, size=factor(letter.count), color="#EC2437", text=mytext, alpha=0.8), shape=20, stroke=FALSE) +  theme_void() + coord_map() + theme(legend.position = "none") + labs(title = "Part 3: Letters Across the World")
+
+a <- ggplotly(p3_sender_type)
+b <- ggplotly(p3_time)
+c <- ggplotly(p3_map, tooltip="text")
+
+a
+b
+#c
+```
+
+A quick overview of the exploratory data analysis:
+
+- Zelda wrote almost all of the letters during this era. Scott had much more going on in his work and with struggling to take care of her mental illness.
+- They telegraphed very few times - it was almost all letters.
+- Their correspondence was more continuous than ever before.
+- The certain spikes in correspondence seemed to correspond to the months Zelda was doing better in hospitals.
+- Most of the locations centered around the mental hospital or the surrounding town.
+- Scott made the move out West to work for Hollywood.
+
+### Text Analysis
+
+Now, I want to dive into text analysis for this third time period. Revisit our text structure, the tibble we created for the third era.
+
+```{r, echo = FALSE}
+head(part3_letters)
+```
+
+Again, let's get rid of the headers so they aren't a nuisance during analysis.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+for (i in (1:length(part3_letters$text))){
+  x <- str_split(part3_letters$text[i], "\n", n=2)[[1]][2]
+  part3_letters$text[i] <- x}
+
+head(part3_letters$text)
+```
+
+Now, we have to unnest the tokens:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p3 <- part3_letters %>%
+    unnest_tokens(word,text)
+```
+
+We take out the stop words:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p3 <- tidy_p3 %>%
+    anti_join(stop_words)
+```
+
+#### Word Frequency
+
+Let's look at the words featured the most in the letters:
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+x <- tidy_p3 %>%
+  count(word, sort = TRUE) 
+
+head(x)
+
+x <- tidy_p3 %>%
+    count(word, sort = TRUE) %>%
+    filter(n > 25) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word)) +
+    geom_col(fill="#EC2437", alpha=0.8) +
+    labs(y = NULL)
+
+ggplotly(x)
+```
+
+There's a return to positive words, with the top words being "love", "darling", and "happy". This is very surprising. When going into this analysis, I thought that the letters written from Zelda while institutionalized would be very negative. On the contrary, they were extremely positive. Zelda wrote beautifully - if not more beautiful prose than F Scott himself. Many of her letters were just so optimistic at her life after the mental hospitals. She took such joy in the simplest things like nature, writing, and her family. 
+
+Looking through the list, I saw some other words that stuck out. Scottie was a huge topic that Zelda and F Scott discussed. Since their daughter was growing older, she attended boarding school, college, and became introduced into society. They discussed their love for their daughter immensely. They talked a lot of writing - both F Scott's and Zelda's, which is why words like "story", "write", "book", and "read" make this list. They also began to run into money problems because of the Great Depression & Scott's struggle to find work in California. This was evident from "money" and "sad". 
+
+#### Sentiment Analysis
+
+The top words were a surprise. They were very positive despite the mental illness and depression. Because of these top words, I think their sentiments will be very positive. 
+
+**AFINN**
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p3_afinn_sentiment <- tidy_p3 %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(doc_id) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+for (i in (1:length(p3_afinn_sentiment$doc_id))){
+  x <- as.integer(strsplit(p3_afinn_sentiment$doc_id[i], "\\.")[[1]][1])
+  p3_afinn_sentiment$doc_id[i] <- x}
+
+p3_afinn_sentiment$doc_id <- as.integer(p3_afinn_sentiment$doc_id)
+
+p3_afinn_sentiment <- p3_afinn_sentiment[order(p3_afinn_sentiment$doc_id),]
+
+gt(head(p3_afinn_sentiment))
+
+x <- ggplot(p3_afinn_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+
+ggplotly(x)
+```
+
+This analysis shows extremely positive sentiment throughout the decade. I was curious about the large spike and revisited the corpus to see what Letter #129 was about. It was from Scott to Zelda, asking her a series of questions about the need to be in a mental institution. It is definitely a very intense and direct letter that has many negative words. However, the sentiment overall is still overwhelmingly positive.
+
+**BING**
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p3_bing_sentiment <- tidy_p3 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(doc_id, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+for (i in (1:length(p3_bing_sentiment$doc_id))){
+  x <- as.integer(strsplit(p3_bing_sentiment$doc_id[i], "\\.")[[1]][1])
+  p3_bing_sentiment$doc_id[i] <- x}
+
+p3_bing_sentiment$doc_id <- as.integer(p3_bing_sentiment$doc_id)
+
+p3_bing_sentiment <- p3_bing_sentiment[order(p3_bing_sentiment$doc_id),]
+
+gt(head(p3_bing_sentiment))
+
+x <- ggplot(p3_bing_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+
+ggplotly(x)
+
+p3_bing_word_counts <- tidy_p3 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+p3_bing_word_counts %>%
+    group_by(sentiment) %>%
+    top_n(10) %>%
+    ungroup() %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word, fill = factor(sentiment))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~sentiment, scales = "free_y") +
+    labs(x = "Contribution to sentiment",
+         y = NULL) +
+    scale_fill_manual(values = c("#EC2437","#FBCDD1"))
+```
+
+The bing analysis shows a different story, with very negative sentiment in the beginning and more positive sentiments throughout and at the end. This is why it's important to use different lexicons. It also gives us a glimpse into what words are causing those sentiments. Because most of the letters were written by Zelda, it makes sense that words such as "sad", "sick", and "miss" are driving the negative emotions. She was sad to be locked up, felt sick from her mental illness, and missed her husband dearly. Most of the positive emotion were driven by "love", "darling", "happy" - which was her optimism through even the hard days.
+
+Overall, this sentiment analysis was more of a mixed bag. There was a stark contrast between really positive letters and really negative letters. I think these swinging emotions were evident of Zelda's illness.
+
+**WORDCLOUD**
+
+A word cloud to visualize the words being repeated most often.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p3 %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 50))
+```
+
+## Part IV: The Final Years (1938-1940)
+
+This final period focuses on Zelda's recuperation from being mentally ill and F Scott's time spent on the West Coast writing for Hollywood. F Scott's health also declined as he struggled with T.B. and other illnesses. Because of this, his secretary helped transcribe letters, which meant carbon copies were left behind. This is why this era has so much of F Scott's correspondence recorded. Zelda & F Scott were much closer and dearer in these letters; perhaps, the time a part and older age had made them appreciate their love and marriage more. While these years see the end of the Great Depression, they see the onset of World War II. 
+
+### Exploratory Data Analysis
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE, results = 'asis'}
+#Create an empty list for the number of the letters in part 3
+part4_letters <- c()
+#Create a for loop to add ".docx" on the end of each number
+for (i in (210:333)){ #iterate over all these letters
+    y <- paste(i, ".docx", sep = "") #create a string of the file name
+    part4_letters[i] <- y} #add the the list of letters in part 3
+#Delete the empty values (letters from Part 1 & Part 2)
+part4_letters <- part4_letters[-c(1:209)]
+#Find the position of those letters within the tibble
+part4_letters_pos <- match(part4_letters, letters_tibble$doc_id)
+#Subset the tibble based off those positions to have part 1 data
+part4_letters <- letters_tibble[c(part4_letters_pos),]
+
+#Create the data frame
+Part4_DF <- data.frame(c(210:333))
+#Create the list for receiver of the letter
+receiver <- c()
+#Create a for loop to pull out the receiver of the document
+for (i in (1:length(part4_letters$doc_id))){ #iterate over every letter
+  y <- strsplit(part4_letters$text[i], " ")[[1]][3] #split the string by spaces 
+  receiver[i] <- unlist(y)} #save the third item to the receiver list
+#Add the receivers to the data frame
+Part4_DF$Receiver <- receiver
+#Create the list for sender of the letter
+sender <- c()
+#Create for loop to do an if/else statement to add opposite of receiver
+for (i in (1:length(Part4_DF$Receiver))){ #iterate over every letter
+    if (Part4_DF$Receiver[i] == "ZELDA"){ #if the receiver was Zelda,
+        y <- "SCOTT"} #then the sender was Scott
+    else { #else
+        y <- "ZELDA"} #the sender was Zelda
+    sender[i] <- y} #add to the list
+#Add the sender list to the data frame
+Part4_DF$Sender <- sender
+#Create a regex expression to look for
+type_str <- "(Wire.)"
+#Create a list for the type of correspondence
+type <- c() 
+#Create a for loop to pull out the type of correspondence
+for (i in (1:length(part4_letters$text))){  #iterate over every letter/wire
+  y <- str_count(part4_letters$text[i], type_str) #look to see if regex is there
+  if (y == 0){ #if there are no occurances of the regex,
+    z <- "Letter"} #then the correspondence was a letter
+  else{ #else
+    z <- "Wire"} #the correspondence was a wire
+  type[i] <- z} #add to the list
+#Add the type list to the data frame
+Part4_DF$Type <- type
+#Create a list for the date the letter was sent
+dates <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part4_DF$Type == "Letter")
+#Create a regex expression to pull out the date from letters
+letter_date_str <- "\\[.*[0-9]{4}\\]"
+#Look for the correspondence in Part 1 that were Wires
+wire_post <- which(Part3_DF$Type == "Wire")
+#Create a regex expression to pull out the date from wires
+wire_date_str <- "[A-Z]{3}\\s+[0-9]{2}.*[0-9]{4}"
+#Create a for loop to pull out the date from each correspondence
+for (i in (1:length(part4_letters$text))){ #iterate over all the items
+  if (is.element(i, letter_pos) == TRUE){ #determine if the correspondence is a letter
+    y <- str_extract(part4_letters$text[i], letter_date_str) #look for the letter date regex
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1]} #take away the second bracket
+  else{ #else
+    y <- str_extract(part4_letters$text[i], wire_date_str)} #look for the wire date regex
+  dates[i] <- unlist(y)} #add to the date list
+#Add the dates to the data frame
+Part4_DF$Date <- unlist(dates)
+#Create the list for the locations  
+locations <- c()
+#Look for the correspondence in Part 1 that were letters
+letter_pos <- which(Part4_DF$Type == "Letter")
+#Create a regex for the letter location
+letter_location_str <- "\\[[A-z]*\\s{0,1}[A-z]*\\,{1}\\s{1}[A-z]*\\,{0,1}\\s{0,1}[A-z]*\\s{0,1}[A-z]*\\]"
+#Create a for loop to pull out the location from each correspondence
+for (i in (1:length(part4_letters$text))){ #iterate over all the items
+    y <- str_extract(part4_letters$text[i], letter_location_str)
+    y <- strsplit(y, "\\[")[[1]][2] #take away the first bracket
+    y <- strsplit(y, "\\]")[[1]][1] #look for the letter date regex
+    locations[i] <- unlist(y)} #add to the date list
+#Add the locations to the data frame
+Part4_DF$Location <- unlist(locations)
+```
+
+Here's the raw data frame achieved from pulling information straight from the letters tibble.
+
+```{r, echo = FALSE}
+#Show the Data Frame
+gt(head(Part4_DF))
+```
+
+Let's clean up the data frame.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE, results = 'asis'}
+#Fix the date
+Part4_DF$Date[77] <- "June 1940"
+Part4_DF$Date[78] <- "June 1940"
+Part4_DF$Date[79] <- "June 1940"
+
+#Factor the months to be in logical order
+Part4_DF$Date <- factor(Part4_DF$Date, levels = c("January 1939", "February 1939", "March 1939", "April 1939", "May 1939", "June 1939", "July 1939", "August 1939", "September 1939", "October 1939", "November 1939", "December 1939", "January 1940", "February 1940", "March 1940", "April 1940", "May 1940", "June 1940", "July 1940", "August 1940", "September 1940", "October 1940", "November 1940", "December 1940"))
+
+#Fix the location
+Part4_DF$Location[9] <- "New York City, New York"
+Part4_DF$Location[10] <- "New York City, New York"
+
+#Fix the first column name
+names(Part4_DF)[names(Part4_DF) == "c.210.333."] <- "Letter Number"
+
+#Show the fixed data frame
+gt(Part4_DF)
+```
+
+A quick glance at this data frame shows that there was a much more even correspondence between Zelda and F Scott. There was a constant amount of letter sending over the two years and far fewer locations as Zelda and F Scott respectively settled down on the East and West Coast.
+
+Now, let's make some visual representations:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p4_sender_type <- ggplot(Part4_DF, aes(fill=Type, x=Sender)) + 
+    geom_bar(position="stack", stat="count") + scale_fill_manual(values = c("#EC2437","#555555"))
+
+p4_time <- ggplot(Part4_DF, aes(x=Date)) + 
+    geom_histogram(stat="count", aes(fill=Type)) + theme(axis.text.x = element_text(angle = 90, vjust=1, hjust=1)) + scale_y_continuous("Count of Letters") +labs(title = "Letters over Time") + scale_fill_manual(values = c("#EC2437","#555555")) 
+
+USA <- map_data("world") %>% filter(region=="USA")
+city_data <- world.cities %>% filter(country.etc=="USA")
+
+p4_city_data <- unique(Part4_DF$Location)
+for (i in c(1:length(p4_city_data))){
+    y <- strsplit(p4_city_data[i], ",")[[1]][1]
+    p4_city_data[i] <- y}
+
+p4_city_data[1] <- "Asheville"
+p4_city_data[3] <- "New York"
+
+x <- c(which(city_data$name == p4_city_data[1]), which(city_data$name == p4_city_data[2]), which(city_data$name == p4_city_data[3]), which(city_data$name == p4_city_data[4]), which(city_data$name == p4_city_data[5]),which(city_data$name == p4_city_data[6]), which(city_data$name == p4_city_data[7]), which(city_data$name == p4_city_data[8]))
+
+p4_cities <- city_data[c(x),]
+p4_cities[6,] <- data.frame(name="Hollywood", country.etc="USA", pop=61491, lat=34.093, long=-118.328, capital=0)
+p4_cities[7,] <- data.frame(name="Encino", country.etc="USA", pop=44581, lat=34.152, long=-118.521, capital=0)
+p4_cities[8,] <- data.frame(name="Saluda", country.etc="USA", pop=692, lat=34.002, long=-81.772, capital=0)
+
+z <- Part4_DF %>% 
+    group_by(Location) %>%
+    count(Location)
+p4_cities$letter.count <- unlist(c(z[3,2], z[8,2], z[6,2], z[1,2], z[5,2], z[4,2], z[2,2], z[7,2]))
+p4_cities <- p4_cities %>%
+  mutate(mytext = paste(
+    "City: ", name, "\n",
+    "Letters: ", letter.count, sep=""))
+
+p4_map <- ggplot() + geom_polygon(data = USA, aes(x=long, y = lat, group=group), fill="grey", alpha=0.3) + geom_point(data=p4_cities, aes(x=long, y=lat, size=factor(letter.count), color="#EC2437", text=mytext, alpha=0.8), shape=20, stroke=FALSE) +  theme_void() + ylim(25,50) + coord_map(xlim=c(-125,-70)) + theme(legend.position = "none") + labs(title = "Part 4: Letters Across the Country")
+
+a <- ggplotly(p4_sender_type)
+b <- ggplotly(p4_time)
+c <- ggplotly(p4_map, tooltip="text")
+
+a
+b
+#c
+```
+A quick overview of the exploratory data analysis:
+
+- More even split of letter writing - I suspect all the eras would look more like this if there had been carbon copies left behind of Scott's letters
+- Most of their correspondence is from letters, not telegraphs.
+- They wrote more than they ever had before over these two years - consistently writing each other a couple times a month.
+- Their locations were far fewer: Zelda started in Asheville and returned to Montgomery, AL when released from the mental hospital. Scott wrote in Encino and eventually moved to Hollywood to continue his career.
+
+### Text Analysis
+
+Now, I want to dive into text analysis for this fourth time period. Revisit our text structure, the tibble we created for the fourth era.
+
+```{r, echo = FALSE}
+head(part4_letters)
+```
+
+Let's get rid of the headers to make text analysis easier.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+for (i in (1:length(part4_letters$text))){
+  x <- str_split(part4_letters$text[i], "\n", n=2)[[1]][2]
+  part4_letters$text[i] <- x}
+
+head(part4_letters$text)
+
+```
+
+Now, we have to unnest the tokens:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p4 <- part4_letters %>%
+    unnest_tokens(word,text)
+```
+
+We take out the stop words:
+
+```{r, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p4 <- tidy_p4 %>%
+    anti_join(stop_words)
+```
+
+#### Word Frequency
+
+Let's look at the words featured the most in the letters:
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+x <- tidy_p4 %>%
+  count(word, sort = TRUE) 
+
+head(x)
+
+x <- tidy_p4 %>%
+    count(word, sort = TRUE) %>%
+    filter(n > 30) %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word)) +
+    geom_col(fill="#EC2437", alpha=0.8) +
+    labs(y = NULL)
+
+ggplotly(x)
+```
+
+The top words are a mix of positive and negative. What strikes me the most are "Scottie" and "money". As discussed in the last section, their daughter was growing up and they were beginning to have money problems. These topics develop in this era as Scottie became a full grown adult and F Scott struggled to pay the hospital bills for Zelda and his own medical bills. However, there are still the positive words like "love", "happy", and "life". 
+
+I'm also intrigued that "time" is a most used word. I wonder if they were beginning to reflect on their lives and the time they had spent apart and together. It's very fitting this was a conversation topic they revisited so often because it was nearing the end of Scott's life (which they could not have known), so it's interesting they were reflecting so much on time.
+
+#### Sentiment Analysis
+
+The top words are varying, but I still think it will be mainly a positive sentiment analysis. While reading this section, it was so clear how much the two loved each other, even if so many of their letters discussed the issues they were anxious about and facing at hand.
+
+**AFINN**
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p4_afinn_sentiment <- tidy_p4 %>% 
+  inner_join(get_sentiments("afinn")) %>% 
+  group_by(doc_id) %>% 
+  summarise(sentiment = sum(value)) %>% 
+  mutate(method = "AFINN")
+
+for (i in (1:length(p4_afinn_sentiment$doc_id))){
+  x <- as.integer(strsplit(p4_afinn_sentiment$doc_id[i], "\\.")[[1]][1])
+  p4_afinn_sentiment$doc_id[i] <- x}
+
+p4_afinn_sentiment <- rbind(p4_afinn_sentiment, c(286, 0, "AFINN"))
+
+p4_afinn_sentiment$doc_id <- as.integer(p4_afinn_sentiment$doc_id)
+
+p4_afinn_sentiment$sentiment <- as.integer(p4_afinn_sentiment$sentiment)
+
+p4_afinn_sentiment <- p4_afinn_sentiment[order(p4_afinn_sentiment$doc_id),]
+
+
+gt(head(p4_afinn_sentiment))
+
+x <- ggplot(p4_afinn_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+
+ggplotly(x)
+```
+
+As suspected, these sentiments are very positive. There is one negative spike at Letter #251. This is a letter from F Scott written at 2 am detailing some very deep thoughts. It definitely makes sense that these letters' overall sentiments are so positive because this was a high point of their relationship. It's tragic that it was also the end of their relationship.
+
+**BING**
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+p4_bing_sentiment <- tidy_p4 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(doc_id, sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(sentiment = positive - negative)
+
+for (i in (1:length(p4_bing_sentiment$doc_id))){
+  x <- as.integer(strsplit(p4_bing_sentiment$doc_id[i], "\\.")[[1]][1])
+  p4_bing_sentiment$doc_id[i] <- x}
+
+p4_bing_sentiment$doc_id <- as.integer(p4_bing_sentiment$doc_id)
+
+p4_bing_sentiment <- p4_bing_sentiment[order(p4_bing_sentiment$doc_id),]
+
+gt(head(p4_bing_sentiment))
+
+x <- ggplot(p4_bing_sentiment, aes(x=doc_id, y=sentiment, fill=sentiment)) + 
+    geom_bar(stat="identity") + 
+    scale_fill_gradient(high="#FBCDD1", low="#EC2437")
+
+ggplotly(x)
+
+p4_bing_word_counts <- tidy_p4 %>%
+  inner_join(get_sentiments("bing")) %>%
+  count(word, sentiment, sort = TRUE) %>%
+  ungroup()
+
+p4_bing_word_counts %>%
+    group_by(sentiment) %>%
+    top_n(10) %>%
+    ungroup() %>%
+    mutate(word = reorder(word, n)) %>%
+    ggplot(aes(n, word, fill = factor(sentiment))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~sentiment, scales = "free_y") +
+    labs(x = "Contribution to sentiment",
+         y = NULL) +
+    scale_fill_manual(values = c("#EC2437","#FBCDD1"))
+```
+
+Bing shows similar results with very positive sentiments. There are some slightly more negative sentiments, too. An exploration of the words causing these sentiments is interesting. Words like "illness", "difficult", "expensive" are driving the negative sentiment. When Scott was ill, he tended to say it was "illness", vs. Zelda, who tended to call herself "sick". This explains why illness is a top word because Scott struggled so much with his physical health. It also elaborates on their money problems, with so many basic things being very expensive to their family. Not only are "love" and "happy" reigning words for the positive sentiment, but now words like "glad" and "grateful" are at the top. Even though their passionate love had died down, the couple settled into being very thankful for each other.
+
+**WORDCLOUD**
+
+One more word cloud to give a visualization of the top words in this era.
+
+```{r, echo = FALSE, warning = FALSE, message=FALSE, error=FALSE}
+tidy_p4 %>%
+  anti_join(stop_words) %>%
+  count(word) %>%
+  with(wordcloud(word, n, max.words = 50))
+```
+
+This concludes the first data analysis of the demographics and sentiments of the letters over time. 
+
+## Total Analysis
+
+After having conducted analysis across each period, I want to conduct analysis that considers a more holistic approach of the data. I want to investigate the changes over time, changes between senders, and changes within sentiments. 
+
+### Topic Modeling
+
+I want to investigate if the topics that F Scott and Zelda discussed changed over time. To accomplish this, I will create an LDA model to create 4 topics throughout the data. I'll see if the 4 topics follow any sort of chronological path.
+
+The first step to topic modeling is loading the data in a clean format with each document's unique ID and its text. This is our letters_tibble, which was created at the beginning of the project. I will recall this tibble and change the doc_id row. Because each doc_id is the name of the uploaded word document file, it orders them by character, not numeric. This means the order goes "1, 100, 101" instead of "1, 2, 3". Because the chronological time line is so important, I will turn each doc_id into an integer so that the tibble can be order chronologically.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+#Set a random seed - I always use my birth year.
+set.seed(1999)
+
+#Revisit the data
+letters_tibble
+#Let's change all the document file names into unique IDs
+for (i in (1:length(letters_tibble$doc_id))){
+  x <- as.integer(strsplit(letters_tibble$doc_id[i], "\\.")[[1]][1])
+  letters_tibble$doc_id[i] <- x
+}
+#Make those IDs into integer values
+letters_tibble$doc_id <- as.integer(letters_tibble$doc_id)
+#Sort the tibble my doc_id (putting them in chronological order)
+letters_tibble <- letters_tibble[order(letters_tibble$doc_id),]
+#View the fixed tibble
+head(letters_tibble)
+```
+
+Next, I have to clean up the data of any content that could disrupt the modeling. Essentially, we want to clean the "noisy" parts of the data set, including: punctuation, numbers, and stop words. 
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+#Get rid of the headers that contain dates, special characters, etc.
+for (i in (1:length(letters_tibble$text))){ #Create a loop to iterate over each letter's content
+  x <- str_split(letters_tibble$text[i], "\n", n=2)[[1]][2] #split the header off 
+  letters_tibble$text[i] <- x} #add back in only the content
+#Remove line 334 - not sure why this appeared
+letters_tibble <- letters_tibble[c(1:333),]
+#Use tidyverse to unnest the tokens
+tidy_letters <- letters_tibble %>% #Select the letters tibble
+    unnest_tokens(word,text) #Unnest the tokens
+#Use tidydverse to get rid of the stop_words
+tidy_letters <- tidy_letters %>% #Select the tidy object foro the letters
+    anti_join(stop_words) #Use anti join to delete stop words
+#Get rid of the numbers
+numbers <- grepl("^[[:digit:]]+$", tidy_letters$word) #Find the numbers in the tidy object
+number_rows <- c() #Find the positions of those numbers
+for (i in (1:length(tidy_letters$doc_id))){ #Create a loop to iterate over each letter
+    if (grepl("^[[:digit:]]+$", tidy_letters$word[i]) == TRUE){ #If the word is a number
+        number_rows[i] <- tidy_letters$doc_id[i]}} #Add it to the number rows list
+positions <- which(is.na(number_rows) == "TRUE") #Positions of the non numbers
+tidy_letters <- tidy_letters[c(positions),] #Returns only rows that aren't numbers
+#Get rid of any blank words
+tidy_letters <- tidy_letters %>% filter(!(word==""))
+#Create a new variable, tokens, that includes a column for row numbers
+tokens <- tidy_letters %>% mutate(ind = row_number())
+#Create a data structure with each row as a document and each column as a word
+tokens <- tokens %>% group_by(doc_id) %>% mutate(ind = row_number()) %>%
+  tidyr::spread(key = ind, value = word)
+#Replace any NA value with a blank space
+tokens [is.na(tokens)] <- ""
+#Recreate the initial tibble data structure with the cleaned data
+tokens <- tidyr::unite(tokens, text,-doc_id,sep =" " )
+#Trim the data to get rid of white space, etc.
+tokens$text <- trimws(tokens$text)
+```
+
+It's time to build the topic model. A lot of this code is a mixture of my own writing, help from CampusWire for Homework 2, Stack Overflow, and a couple of topic modeling guides from Google. I'll attach all the help I had under the bibliography.
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+#Create a corpus
+letters_corpus = Corpus(VectorSource(tokens$text))
+
+#Create document term matrix
+letters_dtm <- DocumentTermMatrix(letters_corpus)
+#Show the object
+letters_dtm
+
+#topic modeling
+letters_lda <- LDA(letters_dtm, method = "Gibbs",k = 4, control = list(iter = 500, seed = 1999))
+letters_lda
+
+#word topic probabilities
+letters_topics <- tidy(letters_lda, matrix = "beta")
+letters_topics
+
+#top terms
+letters_top_terms <- letters_topics %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+letters_top_terms_graph <- letters_top_terms %>%
+    mutate(term = reorder_within(term, beta, topic)) %>%
+    ggplot(aes(beta, term, fill = factor(topic))) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~ topic, scales = "free") +
+    scale_y_reordered() + scale_fill_manual(values=c("#FBCDD1", "#F37784", "#EC2437", "#BC1020"))
+
+ggplotly(letters_top_terms_graph)
+
+#make a data frame with topics as cols, docs as rows and cell values as posterior topic distribution for each document
+gammaDF <- as.data.frame(letters_lda@gamma) 
+names(gammaDF) <- c(1:4)
+#look at at the data frame
+head(gammaDF)
+#assign each document the highest topic distribution
+toptopics <- as.data.frame(cbind(document = row.names(gammaDF), 
+                                 topic = apply(gammaDF,1,function(x) names(gammaDF)[which(x==max(x))])))
+#inspect 
+head(toptopics)
+
+toptopics$document <- as.integer(toptopics$document)
+
+multiple_topics <- c(48,52,69,73,84,130,165,187,210,242,288,292)
+
+for (i in (multiple_topics)){
+  toptopics$topic[i] <- toptopics[i,2][[1]][1]
+}
+
+toptopics$topic <- factor(as.integer(toptopics$topic))
+
+toptopics <- rbind(toptopics, c(333, 1))
+
+topic_graph <- ggplot(toptopics, aes(x=document, y=topic, color=topic)) + geom_point() + scale_color_manual(values=c("#FBCDD1", "#F37784", "#EC2437", "#BC1020"))
+
+ggplotly(topic_graph)
+```
+I start off with building a tibble, then a corpus, then a Document Term Matrix, and then a LDA object. With the LDA object, I create 4 topics. I chose 4 topics because there are 4 defined time periods of this analysis, and I'm curious if each topic will line up with one of the time periods. The first graphic shows the most used words for each time period. I found it difficult to find many differences between them, since the words seem to overlap a lot of the times. It seems that Topic 1 does focus a lot on writing: book, write, writing, stories, play, etc. Topic 2 features words like: Scottie, money, hospital, mamma, so perhaps this overlaps more with Zelda's return from the mental hospitals to her home in AL and Scott's working to make money in LA. Topic 3 features a lot of very positive words: love, darling, heart, miss, sweet, etc. This may correspond to their early romantic love letters, filled with longing. Finally, Topic 4 features words like "world", "time", "people", and "night". Maybe this is also towards the latter era, when they discuss the going-ons of the world in terms of the Great Depression and World War II.
+
+Once the topics are developed, I use the distribution of topics in each document to assign each document a most discussed topic. For example, for Letter #1, Topic 3 has a distribution of 0.34507. Since this is the highest of the four topics, Letter #1 is assigned to Topic 3. The code assigns each document a topic.
+
+After assigning them a topic, I created this dot plot to show the topics over time. It does in fact seem slightly chronological, which is very interesting. Topic 3 - heavy on the love words - is most prominent in the beginning during their courtship. Topic 4 is most prevalent in the middle of their relationship, during their wild years abroad and Zelda's placement in a mental instiution. Topics 1 and 2 remain prevalent throughout the second half of their life, as their letters focus a lot on their work as writers and on their daughter Scottie, their money problems, and mental/physical illnesses.
+
+It seems this topic modeling has successfully found some chronological influence. Let's use this predicted topics as an input for a random forest machine learning algorithm.
+
+### Machine Learning
+
+After conducting preliminary data analysis, sentiment analysis, and topic modeling - let's put it all together to build a data frame that can be used for machine learning. I will be using a random forest to attempt to create a binary classification for each letter being written by Zelda or F Scott. I learned how to do random forests from a summer data science bootcamp & DS 4001 - so a lot of the code for this is from those courses and I've adapted them for this data set.
+
+First, let's build out this data frame:
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+#Create the data frame from previous data frames
+Total_DF <- rbind(Part1_DF, Part2_DF, Part3_DF, Part4_DF)
+#Change the sender into a factor
+Total_DF$Sender <- as.factor(Total_DF$Sender)
+#Change the type into a factor
+Total_DF$Type <- as.factor(Total_DF$Type)
+#Change the location into a factor
+Total_DF$Location <- as.factor(Total_DF$Location)
+#Add a column for afinn sentiment
+Total_DF$afinn <- c(p1_afinn_sentiment$sentiment, p2_afinn_sentiment$sentiment, p3_afinn_sentiment$sentiment, p4_afinn_sentiment$sentiment)
+Total_DF$afinn <- as.integer(Total_DF$afinn)
+#Add a column for bing sentiment
+Total_DF$bing <- c(p1_bing_sentiment$sentiment, p2_bing_sentiment$sentiment, p3_bing_sentiment$sentiment, p4_bing_sentiment$sentiment)
+Total_DF$bing <- as.integer(Total_DF$bing)
+#Add column for topics
+Total_DF$topics <- toptopics$topic
+#Check the data frame's structure
+str(Total_DF)
+#Check for NA values
+which(is.na(Total_DF))
+```
+
+Let's create the random forest model:
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+#Amount of rows of data to work with
+sample_rows = 1:nrow(Total_DF)
+#Create the set of testing rows
+test_rows = sample(sample_rows,
+                   dim(Total_DF)[1]*.20, 
+                   replace = FALSE) 
+#Training and testing data frames
+Total_DF_train = Total_DF[-test_rows,]
+Total_DF_train = Total_DF_train[,-c(1:2,4,5,6)]
+Total_DF_test = Total_DF[test_rows,]
+Total_DF_test = Total_DF_test[,-c(1:2,4,5,6)]
+
+#Build the random forest model
+total_RF <- randomForest(Sender~.,
+                            Total_DF_train,    
+                            ntree = 300,
+                            mtry = 2.65,         
+                            replace = TRUE,
+                            nodesize = 20)
+#Call the model
+total_RF
+
+#Confusion matrix
+total_RF$confusion
+
+#Variable importance
+as.data.frame(total_RF$importance)
+
+#variable importance plot
+varImpPlot(total_RF,  
+           sort = TRUE,        
+           n.var = 4,  
+           main = "Important Factors for Identifying Letter Sender Level",
+           bg = "#FBCDD1",      
+           color = "#EC2437",     
+           lcolor = "black") 
+
+#Predictions
+letters_predict = predict(total_RF,      #<- a randomForest model
+                          Total_DF_test,      #<- the test data set to use
+                          type = "response",   #<- what results to produce, see the help menu for the options
+                          predict.all = TRUE,  #<- should the predictions of all trees be kept?
+                          proximity = TRUE) 
+
+letters_test_pred = data.frame(Total_DF_test, 
+                                 Prediction = letters_predict$predicted$aggregate)
+
+head(letters_test_pred)
+
+total_RF_prediction = as.data.frame(as.numeric(as.character(total_RF$votes[,2])))
+
+total_train_actual = data.frame(as.factor(Total_DF_train$Sender))
+
+total_prediction_comparison = prediction(total_RF_prediction, total_train_actual)
+
+letters_pred_performance = performance(total_prediction_comparison, measure = "tpr", x.measure = "fpr")
+
+plot(letters_pred_performance, 
+     col = "#EC2437", 
+     lwd = 3, 
+     main = "ROC curve")
+grid(col = "black")
+
+letters_auc_RF = performance(total_prediction_comparison, 
+                               "auc")@y.values[[1]]
+letters_auc_RF
+
+```
+This is definitely an interesting result. I'm pretty impressed that the model has a 67% classification rate using just these 3 variables: afinn sentiment, bing sentiment, and assigned topic from topic modeling. Of course, when I ran the random forest with the demographic variables (location, date, etc.) the model's accuracy shot up to the high 80%s for accurately classifying the letters. This model is based ONLY on text analysis though, so the fact that it has a 67% classification rate shows that the machine learning algorithm is learning from the different writing styles. I think with more time and knowledge of random forests, I could really finetune the model to have even better results.
+
+The model had better results for classifying  Zelda than for classifying Scott. I think that's because most of the letters are Zelda's. The model also showed the variable importance, from highest to lowest: topics, afinn, and bing. I think topics being most important makes sense. As seen in the previous section, there did seem to be a topic for each "era", so that would suggest that the topics are correlated with time. And over time, Zelda sent many more letters over the firsts three eras. It's interesting too that the afinn sentiment was more important than the bing sentiment. I will discuss further in the section below, but the confidence intervals for the bootstrap sample means don't overlap at all for afinn, and they do for bing - suggesting that perhaps the difference for their bing sentiments isn't as stark.
+
+I wanted to create a few model diagnostics for the random forest. I created the ROC curve and found the AUC value. The ROC curve looks how it should and the AUC value of 0.86 is quite good for this random forest. So I think that's a good sign that this model is onto a good start. It's so interesting that a machine was able to do classification based off human writing - filled with errors and natural language and all.
+
+### Sentiment Analysis
+
+I want to see if there is a statistical difference between their sentiments. I will use a t-test to compare the actual means between the sentiments of afinn and bing for the Fitzgeralds. I'll also attempt to use a bootstrapping technique, treating each subset of Zelda's and Scott's letters as a "population", and then doing random sampling from those populations (n = 30) 3,000 times, taking the mean of each repeated trial, and then averaging all the trials together. I'll use this simulation to find a mean, standard deviation, and confidence interval for the true mean. The actual mean should be within those confidence intervals. I think this should be a more reliable analysis than just looking at the means of the population, because Zelda has so many more letters than Scott does.
+
+Most of the code for the bootstrapping technique is from my previous STAT 3080 class, so it was provided by Gretchen Martinet. I've just modified it to apply to this data set. 
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+#Creating subsetted data
+zelda_letters <- Total_DF[Total_DF$Sender == "ZELDA",]
+scott_letters <- Total_DF[Total_DF$Sender == "SCOTT",]
+
+## Determine the number of bootstrap samples
+B <- 3000
+n <- 30
+
+### AFINN - ZELDA
+#Actual mean of data
+actual_afinn_zelda_mean <- mean(Total_DF[Total_DF$Sender == "ZELDA",7])
+## Draw the bootstrap samples
+afinn_zelda_boot_samp <- replicate(B, sample(zelda_letters[,7], 30, replace=F))
+afinn_zelda_boot_means <- apply(afinn_zelda_boot_samp, 2, mean)
+## Plot the sampling distribution
+afinn_zelda_means_df <- data.frame(afinn_zelda_boot_means)
+afinn_zelda_histogram <- ggplot(afinn_zelda_means_df, aes(x=afinn_zelda_boot_means)) + geom_histogram(binwidth=1.5,fill="#F37784",color="black")
+## Estimate the mean and standard deviation of the sampling distribution
+afinn_zelda_mean <- mean(afinn_zelda_boot_means)
+afinn_zelda_sd <- sd(afinn_zelda_boot_means)
+## Determine the 95% bootstrap confidence interval of the sample mean
+afinn_zelda_boot_err <- afinn_zelda_boot_means - actual_afinn_zelda_mean
+afinn_zelda_boot_err_sort <- sort(afinn_zelda_boot_err)
+p2.5 <- B*0.025
+p97.5 <- B*0.975
+afinn_zelda_boot_ci <- actual_afinn_zelda_mean - afinn_zelda_boot_err_sort[c(p97.5,p2.5)]
+
+### BING - ZELDA
+#Actual mean of data
+actual_bing_zelda_mean <- mean(Total_DF[Total_DF$Sender == "ZELDA",8])
+## Draw the bootstrap samples
+bing_zelda_boot_samp <- replicate(B, sample(zelda_letters[,8], 30, replace=F))
+bing_zelda_boot_means <- apply(bing_zelda_boot_samp, 2, mean)
+## Plot the sampling distribution
+bing_zelda_means_df <- data.frame(bing_zelda_boot_means)
+bing_zelda_histogram <- ggplot(bing_zelda_means_df, aes(x=bing_zelda_boot_means)) + geom_histogram(binwidth=1.5,fill="#F37784",color="black")
+## Estimate the mean and standard deviation of the sampling distribution
+bing_zelda_mean <- mean(bing_zelda_boot_means)
+bing_zelda_sd <- sd(bing_zelda_boot_means)
+## Determine the 95% bootstrap confidence interval of the sample mean
+bing_zelda_boot_err <- bing_zelda_boot_means - actual_bing_zelda_mean
+bing_zelda_boot_err_sort <- sort(bing_zelda_boot_err)
+p2.5 <- B*0.025
+p97.5 <- B*0.975
+bing_zelda_boot_ci <- actual_bing_zelda_mean - bing_zelda_boot_err_sort[c(p97.5,p2.5)]
+
+### AFINN - SCOTT
+#Actual mean of data
+actual_afinn_scott_mean <- mean(Total_DF[Total_DF$Sender == "SCOTT",7])
+## Draw the bootstrap samples
+afinn_scott_boot_samp <- replicate(B, sample(scott_letters[,7], 30, replace=F))
+afinn_scott_boot_means <- apply(afinn_scott_boot_samp, 2, mean)
+## Plot the sampling distribution
+afinn_scott_means_df <- data.frame(afinn_scott_boot_means)
+afinn_scott_histogram <- ggplot(afinn_scott_means_df, aes(x=afinn_scott_boot_means)) + geom_histogram(binwidth=1.5,fill="#F37784",color="black")
+## Estimate the mean and standard deviation of the sampling distribution
+afinn_scott_mean <- mean(afinn_scott_boot_means)
+afinn_scott_sd <- sd(afinn_scott_boot_means)
+## Determine the 95% bootstrap confidence interval of the sample mean
+afinn_scott_boot_err <- afinn_scott_boot_means - actual_afinn_scott_mean
+afinn_scott_boot_err_sort <- sort(afinn_scott_boot_err)
+p2.5 <- B*0.025
+p97.5 <- B*0.975
+afinn_scott_boot_ci <- actual_afinn_scott_mean - afinn_scott_boot_err_sort[c(p97.5,p2.5)]
+
+### BING - SCOTT
+#Actual mean of data
+actual_bing_scott_mean <- mean(Total_DF[Total_DF$Sender == "SCOTT",8])
+## Draw the bootstrap samples
+bing_scott_boot_samp <- replicate(B, sample(scott_letters[,8], 30, replace=F))
+bing_scott_boot_means <- apply(bing_scott_boot_samp, 2, mean)
+## Plot the sampling distribution
+bing_scott_means_df <- data.frame(bing_scott_boot_means)
+bing_scott_histogram <- ggplot(bing_scott_means_df, aes(x=bing_scott_boot_means)) + geom_histogram(binwidth=1.5,fill="#F37784",color="black")
+## Estimate the mean and standard deviation of the sampling distribution
+bing_scott_mean <- mean(bing_scott_boot_means)
+bing_scott_sd <- sd(bing_scott_boot_means)
+## Determine the 95% bootstrap confidence interval of the sample mean
+bing_scott_boot_err <- bing_scott_boot_means - actual_bing_scott_mean
+bing_scott_boot_err_sort <- sort(bing_scott_boot_err)
+p2.5 <- B*0.025
+p97.5 <- B*0.975
+bing_scott_boot_ci <- actual_bing_scott_mean - bing_scott_boot_err_sort[c(p97.5,p2.5)]
+
+#Plot all of the histograms
+grid.arrange(afinn_zelda_histogram, bing_zelda_histogram, afinn_scott_histogram, bing_scott_histogram)
+
+#Data frame for the afinn statistics
+afinn_sentiments <- data.frame("Statistic" = c("Population Mean", "Bootstrap Mean", "Standard Error", "Confidence Interval Low", "Confidence Interval High"), "Zelda" = c(actual_afinn_zelda_mean, afinn_zelda_mean, afinn_zelda_sd, afinn_zelda_boot_ci), "Scott" = c(actual_afinn_scott_mean, afinn_scott_mean, afinn_scott_sd, afinn_scott_boot_ci))
+
+#Data frame for the bing statistics
+bing_sentiments <- data.frame("Statistic" = c("Population Mean", "Bootstrap Mean", "Standard Error", "Confidence Interval Low", "Confidence Interval High"), "Zelda" = c(actual_bing_zelda_mean, bing_zelda_mean, bing_zelda_sd, bing_zelda_boot_ci), "Scott" = c(actual_bing_scott_mean, bing_scott_mean, bing_scott_sd, bing_scott_boot_ci))
+
+afinn_sentiments
+bing_sentiments
+
+#Conduct the afinn hypothesis test
+t.test(zelda_letters[,7], scott_letters[,7], mu=0, alternative="two.sided")
+#Conduct the bing hypothesis test
+t.test(zelda_letters[,8], scott_letters[,8], mu=0, alternative="two.sided")
+```
+
+The distributions show the distribution of means created for each bootstrapping simulation. The afinn distributions seem to be the most normally distributed while the bing distributions seem to be a little more left skewed. I think the distributions are interesting to see how the average of 30 letters for Zelda could have very low sentiments, despite the overall high population mean for her sentiments. 
+
+The afinn data frame suggests that Zelda does have a statistically higher sentiment average than F Scott. The confidence interval for the 'true population' is always out of the range of Scott's confidence interval for the 'true population'. However, this is not the case for bing. The confidence interval for Zelda overlaps with the confidence interval for Scott. It's not a huge overlap, but it does suggest that perhaps their bing sentiments are closer than originally suspected. 
+
+# Conclusion
+
+Over the four eras of the whirlwind marriage of Zelda and F Scott Fitzgerald, I did in-depth sentiment analysis with the afinn and bing lexicons. I found that the sentiments changed over time, overwhelmingly positive in the beginning, very negative in the beginning of their marriage, and then a slow, gradual ascent to positive sentiments for the rest of their marriage. By using topic modeling and creating an LDA object with 4 topics, I found that the topics did reflect the distinct time periods this analysis was broken up into. By looking at the most featured words of each topic, they did line up with the overall content and sentiments of the letter. Using the sentiment and topic analysis, I created a random forest classification algorithm to predict if each letter was written by Zelda or F Scott. This had good results - not great. It correctly classified the letters about 67% of the time, but this does suggest that the machine learning algorithm did learn from their writing styles. Then, I did a bootstrapping simulation and two-sample t-testing to investigate if there was a statistical difference in the means for Zelda and F Scott in their sentiments. Both t-tests suggest there is a statistical difference. The only counter evidence is the bootstrapping confidence interval for the bing sentiment, which suggests there is a possibility that the true means are equal/close for their bing sentiments.
+
+I think a lot of this research could be a base for research about age, gender, and history. As the couple age, their topics matured greatly, and their conversation turned from blind fixation and adoration to discussions about their family life, work, and the state of the world. There was a difference between the wife's and husband's overall sentiments, with the wife's sentiments as overwhelmingly positive and the husband's sentiments as slightly negative. This could suggest a difference between men and women's writing and speaking defaults. For example, even today there's research that shows women write their work e-mails in a far more effeminate style and man write theirs more directly. Perhaps this has been historically true for women's writing. Finally, I think too there's something to be said for how their writing style is so different than how the modern world writes today. Their most used words - "devoutedly", for example - are very different than how we text/write/email.
+
+Overall, this project was a great joy to work on as I really enjoyed this research. I think I was a bit too ambitious and probably should have focused on greater detail on one idea of analysis. I also am hesitant about the results because of my data collection method and the general lack of data (since so many letters/telegraphs were not saved by the couple). I think the biggest flaw though is, while text analysis can do amazing analysis, there is nothing as poignant as reading the letters. This project can't begin to convey how absolutely beautiful their writing was. And while I can share their positive sentiments and most used words focusing all around love, I think it's hard for text analysis to completely convey the true sentiments behind each letter.
+
+# Bibliography 
+
+Barks, W. Cathy & Bryer, Jackson R. "Dear Scott, Dearest Zelda: The Love Letters of F.Scott and Zelda Fitzgerald." Scribner, July 23, 2019.
+
+Behind the Myths of Scott and Zelda’s Epic Romance | Literary Hub. https://lithub.com/behind-the-myths-of-scott-and-zeldas-epic-romance/. Accessed 6 Dec. 2020.
+
+“How to Check If a String Contains at Least One Numeric Character in R.” Stack Overflow, https://stackoverflow.com/questions/33393112/how-to-check-if-a-string-contains-at-least-one-numeric-character-in-r. Accessed 6 Dec. 2020.
+
+“R - LDA with Topicmodels, How Can I See Which Topics Different Documents Belong To?” Stack Overflow, https://stackoverflow.com/questions/14875493/lda-with-topicmodels-how-can-i-see-which-topics-different-documents-belong-to. Accessed 6 Dec. 2020.
+
+“R - Predicting LDA Topics for New Data.” Stack Overflow, https://stackoverflow.com/questions/16115102/predicting-lda-topics-for-new-data. Accessed 6 Dec. 2020.
+
+Sehgal, Parul. “A Stubborn and Sturdy Love in the Letters of F. Scott and Zelda Fitzgerald (Published 2019).” The New York Times, 23 July 2019. NYTimes.com, https://www.nytimes.com/2019/07/23/books/dear-scott-dearest-zelda-fitzgerald-love-letters.html.
+
+Tang, Farren. “Beginner’s Guide to LDA Topic Modelling with R.” Medium, 14 July 2019, https://towardsdatascience.com/beginners-guide-to-lda-topic-modelling-with-r-e57a5a8e7a25.
+
+Zelda Fitzgerald – F. Scott Fitzgerald Society. https://fscottfitzgeraldsociety.org/about-us-2/biography-zelda-fitzgerald/. Accessed 6 Dec. 2020.
+
